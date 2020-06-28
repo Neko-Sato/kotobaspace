@@ -60,11 +60,11 @@ function onMouseMove(event) {
   pxy = [event.clientX, event.clientY];
   if(is_fast){
     qxy = pxy;
-    is_fast = false
+    is_fast = false;
   }
   xy = [xy[0] + (pxy[0] - qxy[0]), xy[1] + (pxy[1] - qxy[1])]
-  send_data("postget/", JSON.stringify({"x" : xy[0], "y" : xy[1]}));
-  qxy = pxy
+  //send_data("postget/", JSON.stringify({"x" : xy[0], "y" : xy[1]}));
+  qxy = pxy;
 }
 
 function display_block_change(){
