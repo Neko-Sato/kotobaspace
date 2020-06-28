@@ -9,7 +9,7 @@ cd kotobaspace
 python -m venv env
 pip install --upgrade pip
 pip install django
-git clon https://github.com/Neko-Sato/kotobaspace.git
+git clone https://github.com/Neko-Sato/kotobaspace.git
 ```
 
 https://github.com/Neko-Sato/kotobaspace
