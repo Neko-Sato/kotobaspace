@@ -13,7 +13,7 @@ function getCookie(name) {
     return cookieValue;
 }
 const csrftoken = getCookie('csrftoken');
- 
+
 function csrfSafeMethod(method) {
   return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
 }
@@ -24,10 +24,13 @@ function send_data(url_input, data_input){
     data: data_input, 
     contentType: "application/json",
     beforeSend: function(xhr, settings) {
-         if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-             xhr.setRequestHeader("X-CSRFToken", csrftoken);
-         }
-      },
+      if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+      }
+      xhr.onreadystatechange = function() {
+        console.log(xhr.responseText); 
+      }
+    },
   });
 }
 
