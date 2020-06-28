@@ -14,24 +14,14 @@ function getCookie(name) {
 }
 const csrftoken = getCookie('csrftoken');
 
-function csrfSafeMethod(method) {
-  return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-}
-function send_data(url_input, data_input){
-  $.ajax({
-    type: "POST",
-    url: url_input,
-    data: data_input, 
-    contentType: "application/json",
-    beforeSend: function(xhr, settings) {
-      if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-        xhr.setRequestHeader("X-CSRFToken", csrftoken);
-      }
-      xhr.onreadystatechange = function() {
-        console.log(xhr.responseText); 
-      }
-    },
-  });
+function send_data(url, data){
+  xhr = new XMLHttpRequest();
+  xhr.open('POST', url, true);
+  xhr.setRequestHeader("X-CSRFToken", csrftoken);
+  xhr.send(data);
+  xhr.onload = function() {
+    console.log(xhr.responseText);
+  }
 }
 
 var header = document.getElementById("header");
@@ -39,9 +29,6 @@ var hooder = document.getElementById("hooder");
 var space = document.getElementById("space");
 
 window_load();
-
-var xy = pxy = qxy = [0, 0];
-var is_fast = true;
 
 space.onmousedown = onmousedown_do;
 space.onmouseup = onmouseup_do;
@@ -53,6 +40,9 @@ function window_load() {
   header.style.Width = window.innerWidth + 'px';  
   hooder.style.Width = window.innerWidth + 'px'; 
 }  
+
+var xy = pxy = qxy = [0, 0];
+var is_fast = true;
 
 function onmousedown_do() {
   space.style.cursor = "grabbing";
@@ -73,11 +63,11 @@ function onMouseMove(event) {
     is_fast = false
   }
   xy = [xy[0] + (pxy[0] - qxy[0]), xy[1] + (pxy[1] - qxy[1])]
-  send_data("postget/", {"x" : xy[0], "y" : xy[1]});
+  send_data("postget/", JSON.stringify({"x" : xy[0], "y" : xy[1]}));
   qxy = pxy
 }
 
 function display_block_change(){
-  space.innerHTML = ""
-  space.innerHTML += "<div id=\"block\">" + "" + "<div>\n"
+  space.innerHTML = "";
+  space.innerHTML += "<div id=\"block\">" + "" + "<div>\n";
 }

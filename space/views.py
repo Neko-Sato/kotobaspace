@@ -1,3 +1,4 @@
+from django.http import HttpResponse, QueryDict
 from django.shortcuts import render
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic
@@ -7,10 +8,9 @@ from django.views import generic
 class space(LoginRequiredMixin, generic.TemplateView):
     template_name = 'space.html'
 
-
-from django.http import HttpResponse
+import json
 def postget(request):
-    #QueryDict(request.body, encoding='utf-8')
+    print(json.loads(request.body))
     return HttpResponse("ajax is done!")
 
 class post(space):
