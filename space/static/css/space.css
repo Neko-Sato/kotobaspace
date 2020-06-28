@@ -1,0 +1,48 @@
+body {
+  color: #ffffff;
+  background-color:#010101;
+  overflow:hidden;
+}
+
+div#space {
+    z-index: 0;
+    background: 
+    repeating-linear-gradient(
+      90deg,
+      #fff ,
+      #000 1px,
+      transparent 1px,
+      transparent 50px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      #000 ,
+      #fff 1px,
+      #000 1px,
+      #000 50px
+    );
+    background-size: 50px 50px;
+    background-position: 50% 50%;
+}
+
+#block {
+    position: absolute;
+}
+
+#header {
+  z-index: 1;
+  position: fixed;
+  top:10px;
+  left:10px;
+  background-color:#010101;
+  height: 70px; 
+}
+
+#hooder {
+  z-index: 1;
+  position: fixed;
+  bottom:10px;
+  left:10px;
+  background-color:#010101;
+  height: 30px; 
+}
