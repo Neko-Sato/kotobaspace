@@ -1,0 +1,8 @@
+{
+//@sync os=linux
+    "python.pythonPath": "../env/bin/python"
+//@sync os=windows
+//　"python.pythonPath": "..//Script//python"
+//
+
+}
