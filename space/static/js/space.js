@@ -1,38 +1,80 @@
+//トークーンについて
 function getCookie(name) {
   let cookieValue = null;
   if (document.cookie && document.cookie !== '') {
     const cookies = document.cookie.split(';');
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-          if (cookie.substring(0, name.length + 1) === (name + '=')) {
-            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-            break;
-          }
-        }
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
       }
-    return cookieValue;
+    }
+  }
+  return cookieValue;
 }
 const csrftoken = getCookie('csrftoken');
 
-function send_data(url, data){
-  xhr = new XMLHttpRequest();
-  xhr.open('POST', url, true);
-  xhr.setRequestHeader("X-CSRFToken", csrftoken);
-  xhr.send(data);
-  xhr.onload = function() {
-    console.log(xhr.responseText);
+//通信について
+class communication {
+  constructor(url, fun) {
+    this.xhr = new XMLHttpRequest();
+    this.url = url;
+    this.xhr.onload = fun;
+  }
+  send(data){
+    this.xhr.open('POST', this.url, true);
+    this.xhr.setRequestHeader("X-CSRFToken", csrftoken);
+    this.xhr.send(data);
   }
 }
 
+//////
+//以上関数定義
+//////
+
+//送るために
+const post_data = new communication('postget/', recv)
+
+function recv(){
+  console.log(post_data.xhr.responseText);
+}
+
+//ページのデザイン
 var header = document.getElementById("header");
 var hooder = document.getElementById("hooder");
 var space = document.getElementById("space");
 
-window_load();
+//マウス動作について
+document.addEventListener("mousemove",　onMouseMove);
 
-space.onmousedown = onmousedown_do;
-space.onmouseup = onmouseup_do;
+var MouseXY = [0, 0];
+function onMouseMove (event) {
+  MouseXY = [event.pageX, event.pageY];
+}
+
+class MouseAction{
+  constructor() {
+    this.MouseXY_temp = [0, 0];
+  }
+  onmousedown_do() {
+    this.MouseXY_temp = MouseXY;
+    space.style.cursor = "grabbing";
+  }
+  onmouseup_do() {
+    var diff_XY = [this.MouseXY_temp[0] - MouseXY[0], this.MouseXY_temp[1] - MouseXY[1]];
+    this.MouseXY_temp = [0, 0];
+    XY = [XY[0] + diff_XY[0], XY[1] + diff_XY[1]];
+    space.style.cursor = "auto"; 
+  }
+}
+
+var mouseaction = new MouseAction();
+space.onmousedown = mouseaction.onmousedown_do;
+space.onmouseup = mouseaction.onmouseup_do;
 window.onresize = window_load;
+
+window_load();
 
 function window_load() {
   space.style.height = window.innerHeight + 'px'; 
@@ -40,34 +82,3 @@ function window_load() {
   header.style.Width = window.innerWidth + 'px';  
   hooder.style.Width = window.innerWidth + 'px'; 
 }  
-
-var xy = pxy = qxy = [0, 0];
-var is_fast = true;
-
-function onmousedown_do() {
-  space.style.cursor = "grabbing";
-  document.addEventListener("mousemove",onMouseMove);
-}
-
-function onmouseup_do() {
-  qxy = [0, 0];
-  is_fast = true;
-  space.style.cursor = "auto"; 
-  document.removeEventListener("mousemove",onMouseMove)
-}
-
-function onMouseMove(event) {
-  pxy = [event.clientX, event.clientY];
-  if(is_fast){
-    qxy = pxy;
-    is_fast = false;
-  }
-  xy = [xy[0] + (pxy[0] - qxy[0]), xy[1] + (pxy[1] - qxy[1])]
-  //send_data("postget/", JSON.stringify({"x" : xy[0], "y" : xy[1]}));
-  qxy = pxy;
-}
-
-function display_block_change(){
-  space.innerHTML = "";
-  space.innerHTML += "<div id=\"block\">" + "" + "<div>\n";
-}

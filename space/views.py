@@ -7,6 +7,9 @@ from django.views import generic
 
 class space(LoginRequiredMixin, generic.TemplateView):
     template_name = 'space.html'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
 
 import json
 def postget(request):
