@@ -7,6 +7,7 @@
 mkdir kotobaspace
 cd kotobaspace
 python -m venv env
+source env/bin/activate
 pip install --upgrade pip
 pip install django
 git clone https://github.com/Neko-Sato/kotobaspace.git
