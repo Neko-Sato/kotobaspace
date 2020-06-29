@@ -4,13 +4,12 @@
 
 初期設定
 ```
-mkdir kotobaspace
+git clone https://github.com/Neko-Sato/kotobaspace.git
 cd kotobaspace
 python -m venv env
 source env/bin/activate
 python -m pip install --upgrade pip
 pip install django
-git clone https://github.com/Neko-Sato/kotobaspace.git
 ```
 
 https://github.com/Neko-Sato/kotobaspace
