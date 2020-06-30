@@ -3,7 +3,9 @@ from . import views
 
 app_name = 'space'
 urlpatterns = [
-    path('space/@<str:x>,<str:y>', views.space.as_view(), name='space'),  
-    path('space/postget/', views.postget, name='postget'),
-    path('post/', views.post.as_view(), name='space'), 
+    path('', views.index), 
+    path('space/', views.space.as_view()),  
+    path('space/@<str:x><str:y>/', views.space.as_view()),  
+    path('space/postget/', views.postget),
+    path('post/', views.post.as_view()), 
 ]

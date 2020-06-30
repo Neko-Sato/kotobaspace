@@ -1,9 +1,12 @@
-from django.http import HttpResponse, QueryDict
+from django.http import HttpResponse, HttpResponsePermanentRedirect, QueryDict
 from django.shortcuts import render
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic
 
 # Create your views here.
+
+def index(request):
+    return HttpResponsePermanentRedirect('space/')
 
 class space(LoginRequiredMixin, generic.TemplateView):
     template_name = 'space.html'
