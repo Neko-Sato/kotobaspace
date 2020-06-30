@@ -20,7 +20,7 @@ class communication {
   constructor(url, fun) {
     this.xhr = new XMLHttpRequest();
     this.url = url;
-    this.xhr.onload = fun;
+    this.xhr.onload = function(){fun(JSON.parse(this.responseText));};
   }
   send(data){
     this.xhr.open('POST', this.url, true);
@@ -33,9 +33,28 @@ class communication {
 //以上関数定義
 //////
 
+//htmlのやつ
+var space = document.getElementById("space");
+
+window_load();
+
+function window_load() {
+  space.style.height = window.innerHeight + 'px';
+  space.style.Width = window.innerWidth + 'px';
+  header.style.Width = window.innerWidth + 'px';
+  hooder.style.Width = window.innerWidth + 'px';
+}
+
 //右上と左下の座標を送る
-const post_data = new communication('../postget/', function(){
-  console.log(this.responseText);
+const post_data = new communication('../postget/', function(data){
+  space.innerHTML = ""
+  //受信した投稿を表示させる
+  data.Theme_board.forEach(function(item) {
+    space.innerHTML += `<div id="block" style="top: ${parseInt(item.x + window.innerWidth/2)}px; left: ${parseInt(item.y + window.innerHeight/2)}px;">${item.title}</div>\n`;
+  });
+  data.Post.forEach(function(item) {
+    space.innerHTML += `<div id="block" style="top: ${parseInt(item.x + window.innerWidth/2)}px; left: ${parseInt(item.y + window.innerHeight/2)}px;">${item.contents}</div>\n`;
+  });
 });
 post_data.send(JSON.stringify({
   TopLeft: {
@@ -47,9 +66,6 @@ post_data.send(JSON.stringify({
     y: XY[1] + window.innerHeight/2,
   },
 }));
-
-//受信した投稿を表示させる
-
 
 //更新があったら読み込み直す
 //座標を動かしたら
