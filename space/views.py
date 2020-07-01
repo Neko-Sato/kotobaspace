@@ -25,18 +25,21 @@ def json_serial(obj):
     raise TypeError ("Type %s not serializable" % type(obj))
 
 def postget(request):
-    size = json.loads(request.body)
-    data = {}
-    data.update(\
-        Theme_board = list(Theme_board.objects.filter(\
-            x__gte=size['TopLeft']['x'], y__gte=size['TopLeft']['y'],\
-            x__lte=size['BottomRight']['x'], y__lte=size['BottomRight']['y']\
-        ).values()), \
-        Post = list(Post.objects.filter(\
-            x__gte=size['TopLeft']['x'], y__gte=size['TopLeft']['y'],\
-            x__lte=size['BottomRight']['x'], y__lte=size['BottomRight']['y']\
-        ).values())\
-    )
+    size = json.loads(request.body)['data']
+    data = {'Theme_board':[], 'Post':[]}
+    for i in size:
+        data['Theme_board'].extend(\
+            list(Theme_board.objects.filter(\
+                x__gte=i['TopLeft']['x'], y__gte=i['TopLeft']['y'],\
+                x__lte=i['BottomRight']['x'], y__lte=i['BottomRight']['y']\
+            ).values())\
+        )
+        data['Post'].extend(\
+            list(Post.objects.filter(\
+                x__gte=i['TopLeft']['x'], y__gte=i['TopLeft']['y'],\
+                x__lte=i['BottomRight']['x'], y__lte=i['BottomRight']['y']\
+            ).values())\
+        )
     print(data)
     return HttpResponse(json.dumps(data, default=json_serial))
 

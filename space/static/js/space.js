@@ -29,12 +29,10 @@ class communication {
   }
 }
 
-//////
-//以上関数定義
-//////
-
 //htmlのやつ
 var space = document.getElementById("space");
+var header = document.getElementById("header");
+var hooder = document.getElementById("hooder");
 
 window_load();
 
@@ -45,27 +43,82 @@ function window_load() {
   hooder.style.Width = window.innerWidth + 'px';
 }
 
-//右上と左下の座標を送る
-const post_data = new communication('../postget/', function(data){
-  space.innerHTML = ""
-  //受信した投稿を表示させる
-  data.Theme_board.forEach(function(item) {
-    space.innerHTML += `<div id="block" style="top: ${parseInt(item.x + window.innerWidth/2)}px; left: ${parseInt(item.y + window.innerHeight/2)}px;">${item.title}</div>\n`;
+//情報
+var data =  {
+  'Theme_board':[],
+  'Post':[]
+}
+
+//情報の追加と削除
+function display_data(d){
+  Array.prototype.push.apply(data.Theme_board, d.Theme_board);
+  Array.prototype.push.apply(data.Post, d.Post);
+  d.Theme_board.forEach(function(item) {
+    space.innerHTML += `<div id="Theme_board_${item.id}" class="block" style="left: ${parseInt(window.innerWidth/2 + item.x)}px; top: ${parseInt(window.innerHeight/2 + item.y)}px;">${item.title}</div>\n`;
   });
-  data.Post.forEach(function(item) {
-    space.innerHTML += `<div id="block" style="top: ${parseInt(item.x + window.innerWidth/2)}px; left: ${parseInt(item.y + window.innerHeight/2)}px;">${item.contents}</div>\n`;
+  d.Post.forEach(function(item) {
+    space.innerHTML += `<div id="Post_${item.id}" class="block" style="left: ${parseInt(window.innerWidth/2 + item.x)}px; top: ${parseInt(window.innerHeight/2 + item.y)}px;">${item.contents}</div>\n`;
   });
+}
+function remove_data(d){
+  d.Theme_board.forEach(function(item) {
+    document.getElementById("Theme_board_" + item.id).remove();
+  });
+  d.Post.forEach(function(item) {
+    document.getElementById("Post_" + item.id).remove();
+  });
+  daata.Theme_board = data.Theme_board.filter(i => d.Theme_board.indexOf(i) == -1);
+  daata.Post = data.Post.filter(i => d.Post.indexOf(i) == -1);
+}
+
+//情報を取得
+const get_data = new communication('../postget/', function(response){
+  display_data(response);
 });
-post_data.send(JSON.stringify({
-  TopLeft: {
-    x: XY[0] - window.innerWidth/2,
-    y: XY[1] - window.innerHeight/2,
+get_data.send(JSON.stringify({
+  data: [{
+    TopLeft: {
+      x: XY[0] - window.innerWidth/2,
+      y: XY[1] - window.innerHeight/2,
+      },
+    BottomRight: {
+      x: XY[0] + window.innerWidth/2,
+      y: XY[1] + window.innerHeight/2,
     },
-  BottomRight: {
-    x: XY[0] + window.innerWidth/2,
-    y: XY[1] + window.innerHeight/2,
-  },
+  }]
 }));
+
+//差分を収得
+
+//マウス操作について
+document.addEventListener("mousemove",　onMouseMove);
+
+var MouseXY_diff = [0, 0];
+var MouseXY_temp = [0, 0];
+function onMouseMove (event) {
+  MouseXY_diff = [MouseXY_temp[0] - event.pageX, MouseXY_temp[1] - event.pageY];
+  MouseXY_temp = [event.pageX, event.pageY];
+}
+
+class MouseAction{
+  onMouseMove() {
+    XY = [XY[0] + MouseXY_diff[0], XY[1] + MouseXY_diff[1]];
+    console.log(XY);
+  }
+  onmousedown_do() {
+    document.addEventListener("mousemove", this.onMouseMove);
+    space.style.cursor = "move";
+  }
+  onmouseup_do() {
+    space.style.cursor = "auto";
+    document.removeEventListener("mousemove", this.onMouseMove);
+    history.replaceState('','','/space/@' + XY[0] + "," + XY[1]);
+  }
+}
+
+var mouseaction = new MouseAction();
+space.onmousedown = function(){mouseaction.onmousedown_do();};
+space.onmouseup = function(){mouseaction.onmouseup_do();};
 
 //更新があったら読み込み直す
 //座標を動かしたら
