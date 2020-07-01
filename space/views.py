@@ -25,21 +25,26 @@ def json_serial(obj):
     raise TypeError ("Type %s not serializable" % type(obj))
 
 def postget(request):
-    size = json.loads(request.body)['data']
+    r = json.loads(request.body)['range']
+    alredyhadID = json.loads(request.body)['alredyhadID']
     data = {'Theme_board':[], 'Post':[]}
-    for i in size:
+    for i in r:
         data['Theme_board'].extend(\
             list(Theme_board.objects.filter(\
                 x__gte=i['TopLeft']['x'], y__gte=i['TopLeft']['y'],\
-                x__lte=i['BottomRight']['x'], y__lte=i['BottomRight']['y']\
+                x__lte=i['BottomRight']['x'], y__lte=i['BottomRight']['y'],\
+            ).exclude(\
+                id__in=alredyhadID['Theme_board']\
             ).values())\
         )
         data['Post'].extend(\
             list(Post.objects.filter(\
                 x__gte=i['TopLeft']['x'], y__gte=i['TopLeft']['y'],\
-                x__lte=i['BottomRight']['x'], y__lte=i['BottomRight']['y']\
+                x__lte=i['BottomRight']['x'], y__lte=i['BottomRight']['y'],\
+            ).exclude(\
+                id__in=alredyhadID['Post']\
             ).values())\
-        )
+        )#今から三分前ののみ表示例外もある
     print(data)
     return HttpResponse(json.dumps(data, default=json_serial))
 

@@ -28,6 +28,7 @@ div#space {
 .block {
     position: fixed;
     transform: translate(-50%, -50%);
+    white-space: nowrap;
 }
 
 #header {
