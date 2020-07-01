@@ -25,121 +25,130 @@ class communication {
   send(data){
     this.xhr.open('POST', this.url, true);
     this.xhr.setRequestHeader("X-CSRFToken", csrftoken);
-    this.xhr.send(data);
+    this.xhr.send(JSON.stringify(data));
   }
 }
 
-//htmlのやつ
-var space = document.getElementById("space");
-var header = document.getElementById("header");
-var hooder = document.getElementById("hooder");
-
-//情報
-var data =  {
-  'Theme_board':[],
-  'Post':[]
-}
-
-//情報の追加と削除
-function create_data(d){
-  Array.prototype.push.apply(data.Theme_board, d.Theme_board);
-  Array.prototype.push.apply(data.Post, d.Post);
-  d.Theme_board.forEach(function(item) {
-    space.innerHTML += `<div id="Theme_board_${item.id}" class="block Theme_board">${item.title}</div>\n`;
-    temp = document.getElementById("Theme_board_" + item.id);
-    temp.style.left = parseInt(window.innerWidth/2 + item.x - XY[0]) + "px";
-    temp.style.top = parseInt(window.innerHeight/2 + item.y - XY[1]) + "px";
-  });
-  d.Post.forEach(function(item) {
-    space.innerHTML += `<div id="Post_${item.id}" class="block Post">${item.contents}</div>\n`;
-    temp = document.getElementById("Post_" + item.id);
-    temp.style.left = parseInt(window.innerWidth/2 + item.x - XY[0]) + "px";
-    temp.style.top = parseInt(window.innerHeight/2 + item.y - XY[1]) + "px";
-  });
-}
-function remove_data(d){
-  d.Theme_board.forEach(function(item) {
-    document.getElementById("Theme_board_" + item.id).remove();
-  });
-  d.Post.forEach(function(item) {
-    document.getElementById("Post_" + item.id).remove();
-  });
-  daata.Theme_board = data.Theme_board.filter(i => d.Theme_board.indexOf(i) == -1);
-  daata.Post = data.Post.filter(i => d.Post.indexOf(i) == -1);
-}
-function move_data(xy){
-  data.Theme_board.forEach(function(item) {
-    temp = document.getElementById("Theme_board_" + item.id);
-    temp.style.left = parseInt(window.innerWidth/2 + item.x - XY[0]) + "px";
-    temp.style.top = parseInt(window.innerHeight/2 + item.y - XY[1]) + "px";
-  });
-  data.Post.forEach(function(item) {
-    temp = document.getElementById("Post_" + item.id);
-    temp.style.left = parseInt(window.innerWidth/2 + item.x - XY[0]) + "px";
-    temp.style.top = parseInt(window.innerHeight/2 + item.y - XY[1]) + "px";
-  });
-}
-
-//情報を取得
-const get_data = new communication('postget/', create_data);
-get_data.send(JSON.stringify({
-  range: [{
-    TopLeft: {
-      x: XY[0] - window.innerWidth/2,
-      y: XY[1] - window.innerHeight/2,
+//表示について
+class display {
+  constructor(x, y) {
+    this.XY = {
+      x: x,
+      y: y
+    };
+    this.space = document.getElementById("space");
+    this.header = document.getElementById("header");
+    this.hooder = document.getElementById("hooder");
+    this.window_load();
+    window.addEventListener("resize", this.window_load.bind(this));
+    window.addEventListener("resize", this.move_data.bind(this));
+    this.communication = new communication('../../space/postget/', this.outputData.bind(this));
+    this.data = {
+      'Theme_board':[],
+      'Post':[]
+    };
+    this.getData()
+  }
+  window_load() {
+    this.space.style.height = window.innerHeight + 'px';
+    this.space.style.Width = window.innerWidth + 'px';
+    this.header.style.Width = window.innerWidth + 'px';
+    this.hooder.style.Width = window.innerWidth + 'px';
+  }
+  getRange() {
+    var temp = {
+      TopLeft: {
+        x: this.XY.x - window.innerWidth/2,
+        y: this.XY.y - window.innerHeight/2,
       },
-    BottomRight: {
-      x: XY[0] + window.innerWidth/2,
-      y: XY[1] + window.innerHeight/2,
-    },
-  }],
-  alredyhadID: {
-    Theme_board: [],
-    Post: []
+      BottomRight: {
+        x: this.XY.x + window.innerWidth/2,
+        y: this.XY.y + window.innerHeight/2,
+      }
+    };
+    return temp;
   }
-}));
-
-//差分を収得
-
-//マウス操作について
-document.addEventListener("mousemove",　onMouseMove);
-
-var MouseXY_diff = [0, 0];
-var MouseXY_temp = [0, 0];
-function onMouseMove (event) {
-  MouseXY_diff = [MouseXY_temp[0] - event.pageX, MouseXY_temp[1] - event.pageY];
-  MouseXY_temp = [event.pageX, event.pageY];
+  getData() {
+    this.communication.send({
+      range: this.getRange(),
+      alredyhadID: {
+        Theme_board: this.data.Theme_board.map(x => x.id),
+        Post: this.data.Post.map(x => x.id)
+      }
+    });
+  }
+  outputData(data){
+    Array.prototype.push.apply(this.data.Theme_board, data.Theme_board);
+    Array.prototype.push.apply(this.data.Post, data.Post);
+    data.Theme_board.forEach(function(item) {
+      this.space.innerHTML += `<div id="Theme_board_${item.id}" class="block Theme_board">${item.title}</div>\n`;
+    }.bind(this))
+    data.Post.forEach(function(item) {
+      this.space.innerHTML += `<div id="Post_${item.id}" class="block Post">${item.contents}</div>\n`;
+    }.bind(this))
+    this.move_data();
+  }
+  move_data(){
+    var Range = this.getRange();
+    this.data.Theme_board.forEach(function(item) {
+      var temp = document.getElementById("Theme_board_" + item.id);
+      if((Range.TopLeft.x < item.x && item.x < Range.BottomRight.x) && (Range.TopLeft.y < item.y && item.y < Range.BottomRight.y)){
+        temp.style.left = window.innerWidth/2 + item.x - this.XY.x + "px";
+        temp.style.top = window.innerHeight/2 + item.y - this.XY.y + "px";
+      } else {
+        temp.remove();
+        this.data.Theme_board = this.data.Theme_board.filter(i => i != item);
+      }
+    }.bind(this));
+    this.data.Post.forEach(function(item) {
+      var temp = document.getElementById("Post_" + item.id);
+      if((Range.TopLeft.x < item.x && item.x < Range.BottomRight.x) && (Range.TopLeft.y < item.y && item.y < Range.BottomRight.y)){
+        temp.style.left = window.innerWidth/2 + item.x - this.XY.x + "px";
+        temp.style.top = window.innerHeight/2 + item.y - this.XY.y + "px";
+      } else {
+        temp.remove();
+        this.data.Post = this.data.Post.filter(i => i != item);
+      }
+    }.bind(this));
+  }
 }
 
+//マウスについて
 class MouseAction{
-  onMouseMove() {
-    XY = [XY[0] + MouseXY_diff[0], XY[1] + MouseXY_diff[1]];
-    move_data(MouseXY_diff);
+  constructor(display) {
+    this.display = display;
+    this.XY_diff = {
+      x: 0,
+      y: 0
+    };
+    this.XY_temp = {
+      x: 0,
+      y: 0
+    };
+    document.addEventListener("mousemove", this.onMouseMove.bind(this));
+    this.display.space.onmousedown = this.onMouseDown_do.bind(this);
+    this.display.space.onmouseup = this.onMouseUp_do.bind(this);
+    this.onMouseDownAndMove = this.onMouseDownAndMove.bind(this)
   }
-  onmousedown_do() {
-    document.addEventListener("mousemove", this.onMouseMove);
+  onMouseMove(event) {
+    this.XY_diff.x = this.XY_temp.x - event.pageX;
+    this.XY_diff.y = this.XY_temp.y - event.pageY;
+    this.XY_temp.x = event.pageX;
+    this.XY_temp.y = event.pageY;
+  }
+  onMouseDownAndMove() {
+    this.display.XY.x = this.display.XY.x + this.XY_diff.x;
+    this.display.XY.y = this.display.XY.y + this.XY_diff.y;
+    this.display.move_data()
+  }
+  onMouseDown_do() {
+    document.addEventListener("mousemove", this.onMouseDownAndMove);
     space.style.cursor = "move";
   }
-  onmouseup_do() {
+  onMouseUp_do() {
     space.style.cursor = "auto";
-    document.removeEventListener("mousemove", this.onMouseMove);
-    history.replaceState('','','/space/@' + XY[0] + "," + XY[1]);
+    document.removeEventListener("mousemove", this.onMouseDownAndMove);
+    this.display.getData()
+    history.replaceState('','','/space/@' + this.display.XY.x + "," + this.display.XY.y);
   }
 }
-
-var mouseaction = new MouseAction();
-space.onmousedown = function(){mouseaction.onmousedown_do();};
-space.onmouseup = function(){mouseaction.onmouseup_do();};
-window.onresize = window_load;
-
-window_load();
-
-function window_load() {
-  space.style.height = window.innerHeight + 'px';
-  space.style.Width = window.innerWidth + 'px';
-  header.style.Width = window.innerWidth + 'px';
-  hooder.style.Width = window.innerWidth + 'px';
-  move_data([0, 0]);
-}
-
-//更新があったら読み込み直す
