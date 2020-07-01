@@ -152,3 +152,5 @@ class MouseAction{
     history.replaceState('','','/space/@' + this.display.XY.x + "," + this.display.XY.y);
   }
 }
+
+//フッダーに投稿のhtmlを追加する
