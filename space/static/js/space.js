@@ -89,6 +89,7 @@ class display {
     this.move_data();
   }
   move_data(){
+    this.space.style.backgroundPosition = (50/2 - this.XY.x) + "px " + (50/2 - this.XY.y) + "px";
     var Range = this.getRange();
     this.data.Theme_board.forEach(function(item) {
       var temp = document.getElementById("Theme_board_" + item.id);

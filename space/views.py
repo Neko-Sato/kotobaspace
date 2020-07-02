@@ -46,5 +46,4 @@ def postget(request):
             id__in=alredyhadID['Post']\
         ).values())\
     )#今から三分前ののみ表示例外もある
-    print(data)
     return HttpResponse(json.dumps(data, default=json_serial))
