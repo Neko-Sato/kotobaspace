@@ -77,7 +77,7 @@ class display {
       }
     });
   }
-  outputData(data){
+  outputData(data) {
     Array.prototype.push.apply(this.data.Theme_board, data.Theme_board);
     Array.prototype.push.apply(this.data.Post, data.Post);
     data.Theme_board.forEach(function(item) {
@@ -88,25 +88,31 @@ class display {
     }.bind(this))
     this.move_data();
   }
-  move_data(){
+  move_data() {
     this.space.style.backgroundPosition = (50/2 - this.XY.x) + "px " + (50/2 - this.XY.y) + "px";
+    this.data.Theme_board.forEach(function(item) {
+      var temp = document.getElementById("Theme_board_" + item.id);
+      temp.style.left = window.innerWidth/2 + item.x - this.XY.x + "px";
+      temp.style.top = window.innerHeight/2 + item.y - this.XY.y + "px";
+    }.bind(this));
+    this.data.Post.forEach(function(item) {
+      var temp = document.getElementById("Post_" + item.id);
+      temp.style.left = window.innerWidth/2 + item.x - this.XY.x + "px";
+      temp.style.top = window.innerHeight/2 + item.y - this.XY.y + "px";
+    }.bind(this));
+  }
+  remove_data() {
     var Range = this.getRange();
     this.data.Theme_board.forEach(function(item) {
       var temp = document.getElementById("Theme_board_" + item.id);
-      if((Range.TopLeft.x < item.x && item.x < Range.BottomRight.x) && (Range.TopLeft.y < item.y && item.y < Range.BottomRight.y)){
-        temp.style.left = window.innerWidth/2 + item.x - this.XY.x + "px";
-        temp.style.top = window.innerHeight/2 + item.y - this.XY.y + "px";
-      } else {
+      if(!((Range.TopLeft.x < item.x && item.x < Range.BottomRight.x) && (Range.TopLeft.y < item.y && item.y < Range.BottomRight.y))){
         temp.remove();
         this.data.Theme_board = this.data.Theme_board.filter(i => i != item);
       }
     }.bind(this));
     this.data.Post.forEach(function(item) {
       var temp = document.getElementById("Post_" + item.id);
-      if((Range.TopLeft.x < item.x && item.x < Range.BottomRight.x) && (Range.TopLeft.y < item.y && item.y < Range.BottomRight.y)){
-        temp.style.left = window.innerWidth/2 + item.x - this.XY.x + "px";
-        temp.style.top = window.innerHeight/2 + item.y - this.XY.y + "px";
-      } else {
+      if(!((Range.TopLeft.x < item.x && item.x < Range.BottomRight.x) && (Range.TopLeft.y < item.y && item.y < Range.BottomRight.y))){
         temp.remove();
         this.data.Post = this.data.Post.filter(i => i != item);
       }
@@ -150,6 +156,7 @@ class MouseAction{
     space.style.cursor = "auto";
     document.removeEventListener("mousemove", this.onMouseDownAndMove);
     this.display.getData()
+    //this.display.remove_data()
     history.replaceState('','','/space/@' + this.display.XY.x + "," + this.display.XY.y);
   }
 }

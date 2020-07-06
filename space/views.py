@@ -12,7 +12,7 @@ def index(request):
     return HttpResponsePermanentRedirect('space/')
 
 def select(request):
-    return HttpResponsePermanentRedirect('/@0,0')
+    return HttpResponsePermanentRedirect('@0,0/')
 
 class space(LoginRequiredMixin, generic.TemplateView):
     template_name = 'space.html'

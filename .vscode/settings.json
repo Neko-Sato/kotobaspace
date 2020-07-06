@@ -1,6 +1,6 @@
 {
 //@sync os=linux
-    "python.pythonPath": "env/bin/python",
+    "python.pythonPath": "env\\Scripts\\python.exe",
 //@sync os=windows
 //"python.pythonPath": "env\\Scripts\\python.exe",
 //"git.ignoreLimitWarning": true
