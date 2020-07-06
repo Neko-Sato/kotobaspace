@@ -6,5 +6,6 @@ urlpatterns = [
     path('', views.index),
     path('space/', views.select),
     path('space/@<str:x>,<str:y>/', views.space.as_view()),
-    path('space/postget/', views.postget),
+    path('space/post/', views.postget.as_view()),
+    path('space/postget/', views.postget.as_view()),
 ]

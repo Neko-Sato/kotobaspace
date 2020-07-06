@@ -6,7 +6,7 @@ body {
 
 div#space {
     z-index: 0;
-    background: 
+    background:
     repeating-linear-gradient(
       90deg,
       #fff ,
@@ -17,7 +17,7 @@ div#space {
     repeating-linear-gradient(
       0deg,
       #000 ,
-      #fff 1px,
+      #fff 2px,
       #000 1px,
       #000 50px
     );
@@ -37,7 +37,7 @@ div#space {
   top:10px;
   left:10px;
   background-color:#010101;
-  height: 70px; 
+  height: 70px;
 }
 
 #hooder {
@@ -46,5 +46,5 @@ div#space {
   bottom:10px;
   left:10px;
   background-color:#010101;
-  height: 30px; 
+  height: 30px;
 }

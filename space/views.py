@@ -26,24 +26,30 @@ def json_serial(obj):
         return obj.isoformat()
     raise TypeError ("Type %s not serializable" % type(obj))
 
-def postget(request):
-    r = json.loads(request.body)['range']
-    alredyhadID = json.loads(request.body)['alredyhadID']
-    data = {'Theme_board':[], 'Post':[]}
-    data['Theme_board'].extend(\
-        list(Theme_board.objects.filter(\
-            x__gte=r['TopLeft']['x'], y__gte=r['TopLeft']['y'],\
-            x__lte=r['BottomRight']['x'], y__lte=r['BottomRight']['y'],\
-        ).exclude(\
-            id__in=alredyhadID['Theme_board']\
-        ).values())\
-    )
-    data['Post'].extend(\
-        list(Post.objects.filter(\
-            x__gte=r['TopLeft']['x'], y__gte=r['TopLeft']['y'],\
-            x__lte=r['BottomRight']['x'], y__lte=r['BottomRight']['y'],\
-        ).exclude(\
-            id__in=alredyhadID['Post']\
-        ).values())\
-    )#今から三分前ののみ表示例外もある
-    return HttpResponse(json.dumps(data, default=json_serial))
+class postget(LoginRequiredMixin, generic.TemplateView):
+    def post(self, request, **kwargs):
+        r = json.loads(request.body)['range']
+        alredyhadID = json.loads(request.body)['alredyhadID']
+        data = {'Theme_board':[], 'Post':[]}
+        data['Theme_board'].extend(\
+            list(Theme_board.objects.filter(\
+                x__gte=r['TopLeft']['x'], y__gte=r['TopLeft']['y'],\
+                x__lte=r['BottomRight']['x'], y__lte=r['BottomRight']['y'],\
+            ).exclude(\
+                id__in=alredyhadID['Theme_board']\
+            ).values())\
+        )
+        data['Post'].extend(\
+            list(Post.objects.filter(\
+                x__gte=r['TopLeft']['x'], y__gte=r['TopLeft']['y'],\
+                x__lte=r['BottomRight']['x'], y__lte=r['BottomRight']['y'],\
+            ).exclude(\
+                id__in=alredyhadID['Post']\
+            ).values())\
+        )#今から三分前ののみ表示例外もある
+        return HttpResponse(json.dumps(data, default=json_serial))
+
+class post(LoginRequiredMixin, generic.TemplateView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
