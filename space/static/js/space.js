@@ -167,10 +167,7 @@ class MouseAction{
 class send_post{
   constructor(display) {
     this.display = display;
-    this.XYtemp = {
-      x: 0,
-      y: 0
-    }
+    this.sendpost = document.getElementById("sendpost");
   }
   post_display() {
     this.display.selectXY.style.display = "block";
@@ -178,6 +175,13 @@ class send_post{
     this.display.selectXY.onmousedown = this.onMouseDown_do.bind(this);
   }
   onMouseDown_do(){
-    this.display.selectXY.style.display = "none";
+    this.display.selectXY.onmousedown = null;
+    var XYtemp = {
+      x: this.display.XY.x + event.clientX - window.innerWidth/2,
+      y: this.display.XY.y + event.clientY - window.innerHeight/2
+    }
+    this.sendpost.style.display = "block";
+    this.sendpost.style.left = event.clientX + "px";
+    this.sendpost.style.top = event.clientY + "px";
   }
 }
