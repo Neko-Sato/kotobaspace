@@ -39,31 +39,34 @@ class display {
     this.space = document.getElementById("space");
     this.header = document.getElementById("header");
     this.hooder = document.getElementById("hooder");
-    this.window_load();
-    window.addEventListener("resize", this.window_load.bind(this));
+    this.selectXY = document.getElementById("selectXY");
+
+    this.MouseAction = new MouseAction(this);
+    this.getpost = new getpost(this)
+    this.send_post = new send_post(this);
+  }
+}
+
+class getpost {
+  constructor(display) {
+    this.display = display;
     window.addEventListener("resize", this.move_data.bind(this));
     this.communication = new communication('../../space/postget/', this.outputData.bind(this));
     this.data = {
       'Theme_board':[],
       'Post':[]
     };
-    this.getData()
-  }
-  window_load() {
-    this.space.style.height = window.innerHeight + 'px';
-    this.space.style.Width = window.innerWidth + 'px';
-    this.header.style.Width = window.innerWidth + 'px';
-    this.hooder.style.Width = window.innerWidth + 'px';
+    this.getData();
   }
   getRange() {
     var temp = {
       TopLeft: {
-        x: this.XY.x - window.innerWidth/2,
-        y: this.XY.y - window.innerHeight/2,
+        x: this.display.XY.x - window.innerWidth/2,
+        y: this.display.XY.y - window.innerHeight/2,
       },
       BottomRight: {
-        x: this.XY.x + window.innerWidth/2,
-        y: this.XY.y + window.innerHeight/2,
+        x: this.display.XY.x + window.innerWidth/2,
+        y: this.display.XY.y + window.innerHeight/2,
       }
     };
     return temp;
@@ -81,24 +84,24 @@ class display {
     Array.prototype.push.apply(this.data.Theme_board, data.Theme_board);
     Array.prototype.push.apply(this.data.Post, data.Post);
     data.Theme_board.forEach(function(item) {
-      this.space.innerHTML += `<div id="Theme_board_${item.id}" class="block Theme_board">${item.title}</div>\n`;
+      this.display.space.innerHTML += `<div id="Theme_board_${item.id}" class="block Theme_board">${item.title}</div>\n`;
     }.bind(this))
     data.Post.forEach(function(item) {
-      this.space.innerHTML += `<div id="Post_${item.id}" class="block Post">${item.contents}</div>\n`;
+      this.display.space.innerHTML += `<div id="Post_${item.id}" class="block Post">${item.contents}</div>\n`;
     }.bind(this))
     this.move_data();
   }
   move_data() {
-    this.space.style.backgroundPosition = (50/2 - this.XY.x) + "px " + (50/2 - this.XY.y) + "px";
+    this.display.space.style.backgroundPosition = (50/2 - this.display.XY.x) + "px " + (50/2 - this.display.XY.y) + "px";
     this.data.Theme_board.forEach(function(item) {
       var temp = document.getElementById("Theme_board_" + item.id);
-      temp.style.left = window.innerWidth/2 + item.x - this.XY.x + "px";
-      temp.style.top = window.innerHeight/2 + item.y - this.XY.y + "px";
+      temp.style.left = window.innerWidth/2 + item.x - this.display.XY.x + "px";
+      temp.style.top = window.innerHeight/2 + item.y - this.display.XY.y + "px";
     }.bind(this));
     this.data.Post.forEach(function(item) {
       var temp = document.getElementById("Post_" + item.id);
-      temp.style.left = window.innerWidth/2 + item.x - this.XY.x + "px";
-      temp.style.top = window.innerHeight/2 + item.y - this.XY.y + "px";
+      temp.style.left = window.innerWidth/2 + item.x - this.display.XY.x + "px";
+      temp.style.top = window.innerHeight/2 + item.y - this.display.XY.y + "px";
     }.bind(this));
   }
   remove_data() {
@@ -146,7 +149,7 @@ class MouseAction{
   onMouseDownAndMove() {
     this.display.XY.x = this.display.XY.x + this.XY_diff.x;
     this.display.XY.y = this.display.XY.y + this.XY_diff.y;
-    this.display.move_data()
+    this.display.getpost.move_data();
   }
   onMouseDown_do() {
     document.addEventListener("mousemove", this.onMouseDownAndMove);
@@ -155,10 +158,26 @@ class MouseAction{
   onMouseUp_do() {
     space.style.cursor = "auto";
     document.removeEventListener("mousemove", this.onMouseDownAndMove);
-    this.display.getData()
+    this.display.getpost.getData();
     //this.display.remove_data()
     history.replaceState('','','/space/@' + this.display.XY.x + "," + this.display.XY.y);
   }
 }
 
-//フッダーに投稿のhtmlを追加する
+class send_post{
+  constructor(display) {
+    this.display = display;
+    this.XYtemp = {
+      x: 0,
+      y: 0
+    }
+  }
+  post_display() {
+    this.display.selectXY.style.display = "block";
+    this.display.selectXY.style.cursor = "crosshair";
+    this.display.selectXY.onmousedown = this.onMouseDown_do.bind(this);
+  }
+  onMouseDown_do(){
+    this.display.selectXY.style.display = "none";
+  }
+}

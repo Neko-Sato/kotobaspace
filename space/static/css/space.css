@@ -4,25 +4,29 @@ body {
   overflow:hidden;
 }
 
-div#space {
-    z-index: 0;
-    background:
-    repeating-linear-gradient(
-      90deg,
-      #fff ,
-      #000 1px,
-      transparent 1px,
-      transparent 50px
-    ),
-    repeating-linear-gradient(
-      0deg,
-      #000 ,
-      #fff 2px,
-      #000 1px,
-      #000 50px
-    );
-    background-size: 50px 50px;
-    background-position: 50% 50%;
+#space {
+  z-index: 0;
+  height: 100%;
+  width: 100%;
+  top: 0px;
+  left: 0px;
+  background:
+  repeating-linear-gradient(
+    90deg,
+    #fff ,
+    #000 1px,
+    transparent 1px,
+    transparent 50px
+  ),
+  repeating-linear-gradient(
+    0deg,
+    #000 ,
+    #fff 2px,
+    #000 1px,
+    #000 50px
+  );
+  background-size: 50px 50px;
+  background-position: 50% 50%;
 }
 
 .block {
@@ -34,6 +38,7 @@ div#space {
 #header {
   z-index: 1;
   position: fixed;
+  width: 100%;
   top:10px;
   left:10px;
   background-color:#010101;
@@ -43,8 +48,20 @@ div#space {
 #hooder {
   z-index: 1;
   position: fixed;
+  width: 100%;
   bottom:10px;
   left:10px;
   background-color:#010101;
   height: 30px;
+}
+
+#selectXY {
+  display: none;
+  z-index: 2;
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  height: 100%;
+  width: 100%;
+  background-color: rgba(0,0,0,0.4);
 }

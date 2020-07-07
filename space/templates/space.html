@@ -10,15 +10,15 @@
   </div>
   <div id="space">
   </div>
+  <div id="selectXY"></div>
   <div id="hooder">
     <div id="post"></div>
-    <a href="../post">投稿</a>
+    <a href="javascript:p.send_post.post_display();">投稿</a>
     <a href="../accounts/logout">ログアウト</a>
   </div>
 </body>
 <script type="text/javascript" src="{% static 'js/space.js' %}"></script>
 <script>
   p = new display({{x}},{{y}});
-  q = new MouseAction(p);
 </script>
 </html>
