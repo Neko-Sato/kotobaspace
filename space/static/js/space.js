@@ -42,7 +42,7 @@ class display {
     this.selectXY = document.getElementById("selectXY");
 
     this.MouseAction = new MouseAction(this);
-    this.getpost = new getpost(this)
+    this.getpost = new getpost(this);
     this.send_post = new send_post(this);
   }
 }
@@ -51,7 +51,7 @@ class getpost {
   constructor(display) {
     this.display = display;
     window.addEventListener("resize", this.move_data.bind(this));
-    this.communication = new communication('../../space/postget/', this.outputData.bind(this));
+    this.communication = new communication('../postget/', this.outputData.bind(this));
     this.data = {
       'Theme_board':[],
       'Post':[]
@@ -167,7 +167,20 @@ class MouseAction{
 class send_post{
   constructor(display) {
     this.display = display;
+    this.XY = {
+      x: 0,
+      y: 0
+    }
     this.sendpost = document.getElementById("sendpost");
+    this.communication = new communication('../post/', function(){});
+  }
+  sendData() {
+    this.communication.send({
+      Theme_board: 1,
+      contents: document.getElementById("contents").value,
+      x: this.XY.x,
+      y: this.XY.y
+    });
   }
   post_display() {
     this.display.selectXY.style.display = "block";
@@ -176,7 +189,7 @@ class send_post{
   }
   onMouseDown_do(){
     this.display.selectXY.onmousedown = null;
-    var XYtemp = {
+    this.XY = {
       x: this.display.XY.x + event.clientX - window.innerWidth/2,
       y: this.display.XY.y + event.clientY - window.innerHeight/2
     }

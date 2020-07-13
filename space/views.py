@@ -3,6 +3,7 @@ from django.shortcuts import render
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic
 from .models import Theme_board, Post
+from .forms import PostCreateForm
 from datetime import datetime
 import json
 
@@ -50,6 +51,6 @@ class postget(LoginRequiredMixin, generic.TemplateView):
         return HttpResponse(json.dumps(data, default=json_serial))
 
 class post(LoginRequiredMixin, generic.TemplateView):
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
+    def post(self, request, **kwargs):
+        body = json.loads(request.body)
+        return HttpResponse()
