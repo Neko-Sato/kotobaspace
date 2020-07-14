@@ -167,20 +167,30 @@ class MouseAction{
 class send_post{
   constructor(display) {
     this.display = display;
+    this.select = document.getElementById("Theme_board_Select");
+    this.contents = document.getElementById("contents");
     this.XY = {
       x: 0,
       y: 0
     }
     this.sendpost = document.getElementById("sendpost");
-    this.communication = new communication('../post/', function(){});
+    this.communication = new communication('../post/', this.response.bind(this));
   }
   sendData() {
     this.communication.send({
-      Theme_board: 1,
-      contents: document.getElementById("contents").value,
+      Theme_board: this.select.value,
+      contents: this.contents.value,
       x: this.XY.x,
       y: this.XY.y
     });
+  }
+  response(data) {
+    window.location.reload();
+    if (this.select.hasChildNodes()){
+      for (let i=this.select.childNodes.length-1; i>=0; i--) {
+        this.select.removeChild(this.select.childNodes[i]);
+      }
+    }
   }
   post_display() {
     this.display.selectXY.style.display = "block";
@@ -196,5 +206,12 @@ class send_post{
     this.sendpost.style.display = "block";
     this.sendpost.style.left = event.clientX + "px";
     this.sendpost.style.top = event.clientY + "px";
+
+    this.display.getpost.data.Theme_board.forEach(function(item) {
+      var option = document.createElement("option");
+      option.text = item.title;
+      option.value = item.id;
+      this.select.appendChild(option);
+    }.bind(this));
   }
 }

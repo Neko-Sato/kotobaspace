@@ -3,7 +3,7 @@ from django.shortcuts import render
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic
 from .models import Theme_board, Post
-from .forms import PostCreateForm
+from .forms import PostForm
 from datetime import datetime
 import json
 
@@ -53,4 +53,6 @@ class postget(LoginRequiredMixin, generic.TemplateView):
 class post(LoginRequiredMixin, generic.TemplateView):
     def post(self, request, **kwargs):
         body = json.loads(request.body)
-        return HttpResponse()
+        form = PostForm(body)
+##わからんです
+        return HttpResponse(json.dumps({}))
