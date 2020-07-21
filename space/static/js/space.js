@@ -160,7 +160,7 @@ class MouseAction{
     document.removeEventListener("mousemove", this.onMouseDownAndMove);
     this.display.getpost.getData();
     //this.display.remove_data()
-    history.replaceState('','','/space/@' + this.display.XY.x + "," + this.display.XY.y);
+    history.replaceState('','','/space/@' + this.display.XY.x + "," + this.display.XY.y + '/');
   }
 }
 

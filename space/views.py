@@ -52,7 +52,13 @@ class postget(LoginRequiredMixin, generic.TemplateView):
 
 class post(LoginRequiredMixin, generic.TemplateView):
     def post(self, request, **kwargs):
-        body = json.loads(request.body)
-        form = PostForm(body)
-##わからんです
+        PostForm(request)
+        #f.user = request.user
+        #f.Theme_board = Theme_board.objects.filter(id__in=body['Theme_board'])[0]
+        #f.contents = body['contents']
+        #f.x = float(body['x'])
+        #f.y = float(body['y'])
+        #f.datetime = timezone.now
+        #f.save()
+
         return HttpResponse(json.dumps({}))
