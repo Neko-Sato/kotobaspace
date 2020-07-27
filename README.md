@@ -9,7 +9,7 @@ cd kotobaspace
 python -m venv env
 source env/bin/activate
 python -m pip install --upgrade pip
-pip install django
+pip install django channels
 ```
 
 https://github.com/Neko-Sato/kotobaspace
