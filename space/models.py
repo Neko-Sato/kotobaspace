@@ -15,3 +15,5 @@ class Post(models.Model):
     contents = models.TextField()
     x, y = models.FloatField(), models.FloatField()
     datetime = models.DateTimeField(default=timezone.now)
+    def __str__(self):
+        return '{} :{}, ({}, {})'.format(self.user, self.contents, self.x, self.y)
