@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'space.apps.SpaceConfig',
     'accounts.apps.AccountsConfig',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -70,7 +71,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'kotobaspace.wsgi.application'
-
+ASGI_APPLICATION = 'kotobaspace.routing.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
