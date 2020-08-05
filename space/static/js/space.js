@@ -29,6 +29,16 @@ class communication {
   }
 }
 
+class socket {
+  constructor(url, fun) {
+    this.socket = new WebSocket("ws://" + window.location.host + "/websocket/" + url);
+    this.socket.onmessage = function(data){fun(JSON.parse(data.data));};
+  }
+  send(data) {
+    this.socket.send(JSON.stringify(data));
+  }
+}
+
 //表示について
 class display {
   constructor(x, y) {
