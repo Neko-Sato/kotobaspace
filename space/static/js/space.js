@@ -1,3 +1,5 @@
+//書き直し確定
+
 //トークーンについて
 function getCookie(name) {
   let cookieValue = null;
