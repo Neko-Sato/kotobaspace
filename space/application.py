@@ -12,6 +12,8 @@ class users:
         return temp
     def remove(self, u):
         self.users.remove(u)
+    def send(self, msg='OK', data={}, fun=lambda u: True):
+        _ = list(map(lambda u: u.socket.send(msg, data), filter(fun, self.users)))
 
 class user:
     def __init__(self, socket, userslist):
@@ -31,9 +33,30 @@ class user:
         self.userslist.remove(self)
     def set_range(self, data):
         self.range = data
-        #一手前のは除く
-        #範囲内のpost,display=Trueを拾得する
-        #範囲内のテーマボードもかな
+    def get_sapce(self, data):
+        alredyhadID = data
+        data = {
+            'Theme_board' : [],
+            'Post' : [],
+        }
+        data['Theme_board'].extend(\
+            list(Theme_board.objects.filter(\
+                x__gte=self.range['TopLeft']['x'], y__gte=self.range['TopLeft']['y'],\
+                x__lte=self.range['BottomRight']['x'], y__lte=self.range['BottomRight']['y'],\
+            ).exclude(\
+                id__in=alredyhadID['Post']\
+            ).values())\
+        )
+        data['Post'].extend(\
+            list(Post.objects.filter(\
+                x__gte=self.range['TopLeft']['x'], y__gte=self.range['TopLeft']['y'],\
+                x__lte=self.range['BottomRight']['x'], y__lte=self.range['BottomRight']['y'],\
+                display__exact=True, \
+            ).exclude(\
+                id__in=alredyhadID['Post']\
+            ).values())\
+        )
+        self.socket.send('get_sapce', data)
     def test(self, data):
         self.socket.send()
     def post(self, data):
@@ -46,4 +69,9 @@ class user:
             x.display = False
             x.save()
         Timer(180, fun, (temp_object,)).start()
-        #範囲内のuserに送る
+        dict_temp_object = temp_object.__dict__
+        del dict_temp_object['_state']
+        self.userslist.send('new_post', dict_temp_object, lambda u: \
+            (u.range['TopLeft']['x'] <= temp_object.x <= u.range['BottomRight']['x']) and \
+            (u.range['TopLeft']['y'] <= temp_object.y <= u.range['BottomRight']['y'])\
+            )
