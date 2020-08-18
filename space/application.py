@@ -56,6 +56,8 @@ class user:
                 id__in=alredyhadID['Post']\
             ).values())\
         )
+        for i in data['Post']:
+            del i['display']
         self.socket.send('get_sapce', data)
     def test(self, data):
         self.socket.send()
@@ -69,8 +71,9 @@ class user:
             x.display = False
             x.save()
         Timer(180, fun, (temp_object,)).start()
-        dict_temp_object = temp_object.__dict__
+        dict_temp_object = temp_object.__dict__.copy()
         del dict_temp_object['_state']
+        del dict_temp_object['display']
         self.userslist.send('new_post', dict_temp_object, lambda u: \
             (u.range['TopLeft']['x'] <= temp_object.x <= u.range['BottomRight']['x']) and \
             (u.range['TopLeft']['y'] <= temp_object.y <= u.range['BottomRight']['y'])\
