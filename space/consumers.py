@@ -1,6 +1,7 @@
 from channels.generic.websocket import WebsocketConsumer
 from asgiref.sync import async_to_sync
 from .application import users
+from inspect import getmembers
 import json
 from datetime import datetime
 
@@ -22,7 +23,4 @@ class test(WebsocketConsumer):
         super().send(json.dumps({'massage': msg, 'data' : data}, default=json_serial))
     def receive(self, text_data):
         data = json.loads(text_data)
-        try:
-            eval('self.com.' + data['function'])(data['argument'])
-        except AttributeError:
-            print('error', data)
+        dict(getmembers(self.com))[data['function']](data['argument'])
