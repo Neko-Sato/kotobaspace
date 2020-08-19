@@ -1,7 +1,7 @@
 from channels.generic.websocket import WebsocketConsumer
 from asgiref.sync import async_to_sync
 from .application import users
-from inspect import getmembers
+import inspect
 import json
 from datetime import datetime
 
@@ -23,4 +23,11 @@ class test(WebsocketConsumer):
         super().send(json.dumps({'massage': msg, 'data' : data}, default=json_serial))
     def receive(self, text_data):
         data = json.loads(text_data)
-        dict(getmembers(self.com))[data['function']](data['argument'])
+        massage = data.get('massage')
+        data = data.get('data')
+        if massage == None or data == None:
+            self.send('error: Missing format')
+            return
+        dict(inspect.getmembers(self.com, inspect.ismethod)).get(massage, \
+            lambda x: self.send('error: Not Found Code'))\
+            (data)

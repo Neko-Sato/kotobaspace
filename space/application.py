@@ -44,7 +44,7 @@ class user:
                 x__gte=self.range['TopLeft']['x'], y__gte=self.range['TopLeft']['y'],\
                 x__lte=self.range['BottomRight']['x'], y__lte=self.range['BottomRight']['y'],\
             ).exclude(\
-                id__in=alredyhadID['Post']\
+                id__in=alredyhadID['Theme_board']\
             ).values())\
         )
         data['Post'].extend(\
@@ -58,7 +58,7 @@ class user:
         )
         for i in data['Post']:
             del i['display']
-        self.socket.send('get_sapce', data)
+        self.socket.send('set_space', data)
     def test(self, data):
         self.socket.send()
     def post(self, data):

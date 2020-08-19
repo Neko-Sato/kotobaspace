@@ -1,5 +1,3 @@
-//書き直し確定
-
 //トークーンについて
 function getCookie(name) {
   let cookieValue = null;
@@ -18,7 +16,7 @@ function getCookie(name) {
 const csrftoken = getCookie('csrftoken');
 
 //通信について
-class communication {
+class Http_Post {
   constructor(url, fun) {
     this.xhr = new XMLHttpRequest();
     this.url = url;
@@ -31,15 +29,168 @@ class communication {
   }
 }
 
-class socket {
+class Socket {
   constructor(url, fun) {
     this.socket = new WebSocket("ws://" + window.location.host + "/websocket/" + url);
     this.socket.onmessage = function(data){fun(JSON.parse(data.data));};
+    this.socket.onopen = function() { this.send( { massage : 'test', data : {} } ) }.bind(this);
+    if(this.socket.readyState == WebSocket.OPEN) this.socket.onopen();
   }
   send(data) {
     this.socket.send(JSON.stringify(data));
   }
 }
+
+//メイン
+class Main {
+  constructor() {
+    this.space = document.getElementById("space");
+  }
+  Execution(x, y){
+    this.Application = new Application(x, y);
+  }
+}
+
+class Application {
+  constructor(x, y) {
+    this.space = document.getElementById("space");
+
+    this.XY = {x:x, y:y}
+    this.data = {Theme_board: [], Post: []}
+
+    this.socket = new Socket('test/', this.recv.bind(this));
+    this.MouseAction = new MouseAction(this.space);
+    this.MouseAction.MouseMove = function(XYdiff){
+      this.XY.x = this.XY.x + XYdiff.x;
+      this.XY.y = this.XY.y + XYdiff.y;
+      this.move_data();
+    }.bind(this);
+    this.MouseAction.onMouseUp = function(XYdiff){
+      this.getSpace();
+      history.replaceState('','','/space/@' + this.XY.x + "," + this.XY.y + '/');
+    }.bind(this);
+
+    window.addEventListener("resize", this.getSpace.bind(this));
+    this.socket.socket.onopen = this.getSpace.bind(this);
+  }
+  recv(data){
+    console.log(data);
+    if(data.massage == 'set_space'){
+      this.setSpace(data.data);
+    }
+  }
+  getSpace(){
+    this.socket.send({massage : 'set_range', data : this.getRange()});
+    this.socket.send({massage : 'get_sapce', data : {
+      Theme_board: this.data.Theme_board.map(x => x.id),
+      Post: this.data.Post.map(x => x.id)
+    }});
+  }
+  setSpace(data){
+    Array.prototype.push.apply(this.data.Theme_board, data.Theme_board.map(x => new Theme_board(x)));
+    Array.prototype.push.apply(this.data.Post, data.Post.map(x => new Post(x)));
+    this.move_data()
+  }
+  move_data() {
+    this.space.style.backgroundPosition = (50/2 - this.XY.x) + "px " + (50/2 - this.XY.y) + "px";
+    this.data.Theme_board.forEach(x => x.move(this.XY), this);
+    this.data.Post.forEach(x => x.move(this.XY), this);
+  }
+  getRange(){
+    var temp = {
+      TopLeft: {
+        x: this.XY.x - window.innerWidth/2,
+        y: this.XY.y - window.innerHeight/2,
+      },
+      BottomRight: {
+        x: this.XY.x + window.innerWidth/2,
+        y: this.XY.y + window.innerHeight/2,
+      }
+    };
+    return temp;
+  }
+}
+
+class ObjectItem {
+  constructor(data) {
+    this.id = data.id
+    this.XY = {x : data.x, y : data.y}
+    this.datetime = new Date(data.datetime)
+  }
+  getElement(text){
+    document.getElementById("space").innerHTML += text;
+    return document.getElementById(this.__proto__.constructor.name + "_" + this.id);
+  }
+  move(XY){
+    this.Element.style.left = window.innerWidth/2 + this.XY.x - XY.x + "px";
+    this.Element.style.top = window.innerHeight/2 + this.XY.y - XY.y + "px";
+  }
+}
+
+class Theme_board extends ObjectItem {
+  constructor(data) {
+    super(data);
+    this.title = data.title
+    this.Element = this.getElement(`<div id="Theme_board_${this.id}" class="block Theme_board">${this.title}</div>\n`);
+  }
+}
+
+class Post extends ObjectItem {
+  constructor(data) {
+    super(data);
+    this.Theme_board = data.Theme_board
+    this.contents = data.contents
+    this.Element = this.getElement(`<div id="Post_${this.id}" class="block Post">${this.contents}</div>\n`);
+    //this.datetime+180秒後に削除する非同期処理
+  }
+}
+
+class MouseAction {
+  constructor(block) {
+    this.block = block;
+    document.addEventListener("mousemove", this.onMouseMove.bind(this));
+    this.block.onmousedown = this.onMouseDown_do.bind(this);
+    this.block.onmouseup = this.onMouseUp_do.bind(this);
+    this.onMouseDownAndMove = this.onMouseDownAndMove.bind(this);
+
+    this.XYtemp = {x:0, y:0};
+    this.XYdiff = {x:0, y:0};
+    this.MouseMove = function(XYdiff){}.bind(this);
+    this.onMouseUp = function(XYdiff){}.bind(this);
+  }
+  onMouseMove(event) {
+    this.XYdiff.x = this.XYtemp.x - event.pageX;
+    this.XYdiff.y = this.XYtemp.y - event.pageY;
+    this.XYtemp.x = event.pageX;
+    this.XYtemp.y = event.pageY;
+  }
+  onMouseDownAndMove() {
+    this.MouseMove(this.XYdiff);
+  }
+  onMouseDown_do() {
+    document.addEventListener("mousemove", this.onMouseDownAndMove);
+    space.style.cursor = "move";
+  }
+  onMouseUp_do() {
+    space.style.cursor = "auto";
+    document.removeEventListener("mousemove", this.onMouseDownAndMove);
+    this.onMouseUp();
+  }
+}
+
+base = new Main();
+/* 
+
+
+  recv(data){
+    var d = JSON.parse(data.data);
+    var temp = this.funs[d.massage]
+    if(temp != undefined){
+      temp(d.data)
+    } else {
+      console.log('erorr: Not Found :' + d.massage);
+    }
+  }
 
 //表示について
 class display {
@@ -227,3 +378,4 @@ class send_post{
     }.bind(this));
   }
 }
+*/
