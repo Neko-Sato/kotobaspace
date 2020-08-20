@@ -61,7 +61,7 @@ class user:
         self.socket.send('set_space', data)
     def test(self, data):
         self.socket.send()
-    def post(self, data):
+    def create_post(self, data):
         temp_object = Post.objects.create(\
         user = self.socket.scope['user'],\
         Theme_board = Theme_board.objects.get(pk=data['Theme_board']),\

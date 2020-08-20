@@ -44,7 +44,11 @@ class Socket {
 //メイン
 class Main {
   constructor() {
+    this.Application = null;
     this.space = document.getElementById("space");
+
+    this.header = document.getElementById("header");
+    this.hooder = document.getElementById("hooder");
   }
   Execution(x, y){
     this.Application = new Application(x, y);
@@ -59,11 +63,12 @@ class Application {
     this.data = {Theme_board: [], Post: []}
 
     this.socket = new Socket('test/', this.recv.bind(this));
+    this.CreatePost = new CreatePost(this);
     this.MouseAction = new MouseAction(this.space);
     this.MouseAction.MouseMove = function(XYdiff){
       this.XY.x = this.XY.x + XYdiff.x;
       this.XY.y = this.XY.y + XYdiff.y;
-      this.move_data();
+      this.moveObjectItem();
     }.bind(this);
     this.MouseAction.onMouseUp = function(XYdiff){
       this.getSpace();
@@ -77,6 +82,8 @@ class Application {
     console.log(data);
     if(data.massage == 'set_space'){
       this.setSpace(data.data);
+    } else if(data.massage == 'new_post'){
+      this.newPost(data.data);
     }
   }
   getSpace(){
@@ -87,14 +94,25 @@ class Application {
     }});
   }
   setSpace(data){
-    Array.prototype.push.apply(this.data.Theme_board, data.Theme_board.map(x => new Theme_board(x)));
-    Array.prototype.push.apply(this.data.Post, data.Post.map(x => new Post(x)));
-    this.move_data()
+    Array.prototype.push.apply(this.data.Theme_board, data.Theme_board.map(x => new Theme_board(x, this.dataremove.bind(this))));
+    Array.prototype.push.apply(this.data.Post, data.Post.map(x => new Post(x, this.dataremove.bind(this))));
+    this.moveObjectItem()
   }
-  move_data() {
+  moveObjectItem() {
     this.space.style.backgroundPosition = (50/2 - this.XY.x) + "px " + (50/2 - this.XY.y) + "px";
     this.data.Theme_board.forEach(x => x.move(this.XY), this);
     this.data.Post.forEach(x => x.move(this.XY), this);
+  }
+  CreatePostSend(){
+    this.socket.send({massage : "create_post" , data : this.CreatePost.getData()})
+  }
+  newPost(data){
+    this.data.Post.push(new Post(data, this.dataremove.bind(this)));
+    this.moveObjectItem();
+  }
+  dataremove(arg) {
+    arg.getElement().remove();
+    this.data[arg.__proto__.constructor.name] = this.data[arg.__proto__.constructor.name].filter(x => x != arg);
   }
   getRange(){
     var temp = {
@@ -111,37 +129,97 @@ class Application {
   }
 }
 
+class CreatePost{
+  constructor(app){
+    this.app = app;
+    this.space = document.getElementById("space");
+    this.selectXY = document.getElementById("selectXY");
+    this.select = document.getElementById("Theme_board_Select");
+    this.contents = document.getElementById("contents");
+    this.sendpost = document.getElementById("sendpost");
+    this.XY = { x: 0, y: 0 };
+  }
+  DisplayMenu() {
+    this.selectXY.style.display = "block";
+    this.selectXY.style.cursor = "crosshair";
+    this.selectXY.onmousedown = function(event){
+      this.selectXY.onmousedown = null;
+      this.selectXY.style.cursor = "auto";
+      this.XY = {
+        x: this.XY.x + event.clientX - window.innerWidth/2,
+        y: this.XY.y + event.clientY - window.innerHeight/2
+      }
+      this.sendpost.style.display = "block";
+      this.sendpost.style.left = event.clientX + "px";
+      this.sendpost.style.top = event.clientY + "px";
+      this.app.data.Theme_board.forEach(function(item) {
+        var option = document.createElement("option");
+        option.text = item.title;
+        option.value = item.id;
+        this.select.appendChild(option);
+        }, this);
+    }.bind(this);
+  }
+  getData() {
+    var temp = {
+      Theme_board : this.select.value,
+      contents : this.contents.value,
+      XY : {
+        x : this.XY.x,
+        y : this.XY.y
+      }
+    };
+    this.reset()
+    return temp;
+  }
+  reset(){
+    if (this.select.hasChildNodes()) this.select.childNodes.forEach(x =>this.select.removeChild(x), this);
+    this.contents.value = "";
+    this.XY = { x: 0, y: 0 };
+    this.selectXY.style.display = "None";
+    this.sendpost.style.display = "None";
+  }
+}
+
 class ObjectItem {
-  constructor(data) {
+  constructor(data, removefun) {
+    this.removefun = removefun;
     this.id = data.id
     this.XY = {x : data.x, y : data.y}
     this.datetime = new Date(data.datetime)
   }
-  getElement(text){
+  AddinnerHTML(text){
     document.getElementById("space").innerHTML += text;
+  }
+  getElement(){
     return document.getElementById(this.__proto__.constructor.name + "_" + this.id);
   }
   move(XY){
-    this.Element.style.left = window.innerWidth/2 + this.XY.x - XY.x + "px";
-    this.Element.style.top = window.innerHeight/2 + this.XY.y - XY.y + "px";
+    var temp = this.getElement();
+    temp.style.left = window.innerWidth/2 + this.XY.x - XY.x + "px";
+    temp.style.top = window.innerHeight/2 + this.XY.y - XY.y + "px";
   }
 }
 
 class Theme_board extends ObjectItem {
-  constructor(data) {
-    super(data);
+  constructor(data, removefun) {
+    super(data, removefun);
     this.title = data.title
-    this.Element = this.getElement(`<div id="Theme_board_${this.id}" class="block Theme_board">${this.title}</div>\n`);
+    this.AddinnerHTML(`<div id="Theme_board_${this.id}" class="block Theme_board">${this.title}</div>\n`);
   }
 }
 
 class Post extends ObjectItem {
-  constructor(data) {
-    super(data);
-    this.Theme_board = data.Theme_board
-    this.contents = data.contents
-    this.Element = this.getElement(`<div id="Post_${this.id}" class="block Post">${this.contents}</div>\n`);
+  constructor(data, removefun) {
+    super(data, removefun);
+    this.Theme_board = data.Theme_board;
+    this.contents = data.contents;
+    this.AddinnerHTML(`<div id="Post_${this.id}" class="block Post">${this.contents}</div>\n`);
     //this.datetime+180秒後に削除する非同期処理
+    console.log( this.datetime-new Date() + 180000)
+    setTimeout(function(){
+      this.removefun(this);
+    }.bind(this), this.datetime-new Date() + 3 * 60 * 1000);
   }
 }
 
