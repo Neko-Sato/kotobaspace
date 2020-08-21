@@ -33,7 +33,6 @@ class Socket {
     this.socket = new WebSocket("ws://" + window.location.host + "/websocket/" + url);
     this.socket.onmessage = function(data){ fun(JSON.parse(data.data));};
     this.socket.onopen = function() { this.send( { massage : 'test', data : {} } ) }.bind(this);
-    if(this.socket.readyState == WebSocket.OPEN) this.socket.onopen();
   }
   send(data) {
     this.socket.send(JSON.stringify(data));
@@ -62,6 +61,7 @@ class Application {
     this.data = new SpaceData();
 
     this.socket = new Socket('test/', this.recv.bind(this));
+
     this.CreatePost = new CreatePost(this.data);
     this.MouseAction = new MouseAction(this.space);
     this.MouseAction.MouseMove = function(XYdiff){
