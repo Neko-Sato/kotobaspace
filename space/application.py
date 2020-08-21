@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from threading import Timer
 from .models import Theme_board, Post
 
@@ -34,26 +35,21 @@ class user:
     def set_range(self, data):
         self.range = data
     def get_sapce(self, data):
-        alredyhadID = data
         data = {
             'Theme_board' : [],
             'Post' : [],
         }
         data['Theme_board'].extend(\
             list(Theme_board.objects.filter(\
-                x__gte=self.range['TopLeft']['x'], y__gte=self.range['TopLeft']['y'],\
-                x__lte=self.range['BottomRight']['x'], y__lte=self.range['BottomRight']['y'],\
-            ).exclude(\
-                id__in=alredyhadID['Theme_board']\
+                x__range=(self.range['TopLeft']['x'], self.range['BottomRight']['x']),\
+                y__range=(self.range['TopLeft']['y'], self.range['BottomRight']['y']),\
             ).values())\
         )
         data['Post'].extend(\
             list(Post.objects.filter(\
-                x__gte=self.range['TopLeft']['x'], y__gte=self.range['TopLeft']['y'],\
-                x__lte=self.range['BottomRight']['x'], y__lte=self.range['BottomRight']['y'],\
-                display__exact=True, \
-            ).exclude(\
-                id__in=alredyhadID['Post']\
+                x__range=(self.range['TopLeft']['x'], self.range['BottomRight']['x']),\
+                y__range=(self.range['TopLeft']['y'], self.range['BottomRight']['y']),\
+                datetime__gt=datetime.now()-timedelta(seconds=30),\
             ).values())\
         )
         for i in data['Post']:
@@ -70,7 +66,7 @@ class user:
         def fun(x):
             x.display = False
             x.save()
-        Timer(180, fun, (temp_object,)).start()
+        Timer(30, fun, (temp_object,)).start()
         dict_temp_object = temp_object.__dict__.copy()
         del dict_temp_object['_state']
         del dict_temp_object['display']
