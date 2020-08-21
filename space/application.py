@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from threading import Timer
 from .models import Theme_board, Post
 
 class users:
@@ -35,25 +34,22 @@ class user:
     def set_range(self, data):
         self.range = data
     def get_sapce(self, data):
+        temp = datetime.fromisoformat(data['datetime'].replace('Z', '+00:00'))
         data = {
             'Theme_board' : [],
             'Post' : [],
         }
         data['Theme_board'].extend(\
-            list(Theme_board.objects.filter(\
+            [x.get_dict() for x in Theme_board.objects.filter(\
                 x__range=(self.range['TopLeft']['x'], self.range['BottomRight']['x']),\
                 y__range=(self.range['TopLeft']['y'], self.range['BottomRight']['y']),\
-            ).values())\
-        )
+            )])
         data['Post'].extend(\
-            list(Post.objects.filter(\
+            [x.get_dict() for x in Post.objects.filter(\
                 x__range=(self.range['TopLeft']['x'], self.range['BottomRight']['x']),\
                 y__range=(self.range['TopLeft']['y'], self.range['BottomRight']['y']),\
-                datetime__gt=datetime.now()-timedelta(seconds=30),\
-            ).values())\
-        )
-        for i in data['Post']:
-            del i['display']
+                datetime__range=(temp-timedelta(seconds=30), temp),\
+            )])
         self.socket.send('set_space', data)
     def test(self, data):
         self.socket.send()
@@ -63,14 +59,14 @@ class user:
         Theme_board = Theme_board.objects.get(pk=data['Theme_board']),\
         contents = data['contents'],\
         x = float(data['XY']['x']), y = float(data['XY']['y']))
-        def fun(x):
-            x.display = False
-            x.save()
-        Timer(30, fun, (temp_object,)).start()
-        dict_temp_object = temp_object.__dict__.copy()
-        del dict_temp_object['_state']
-        del dict_temp_object['display']
-        self.userslist.send('new_post', dict_temp_object, lambda u: \
+        self.userslist.send('new_post', temp_object.get_dict(), lambda u: \
             (u.range['TopLeft']['x'] <= temp_object.x <= u.range['BottomRight']['x']) and \
             (u.range['TopLeft']['y'] <= temp_object.y <= u.range['BottomRight']['y'])\
-            )
+        )
+
+class dict(dict):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.__dict__.update(self)
+def dict2new_dict():
+    pass

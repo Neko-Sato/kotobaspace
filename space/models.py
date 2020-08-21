@@ -8,6 +8,16 @@ class Theme_board(models.Model):
     datetime = models.DateTimeField(default=timezone.now)
     def __str__(self):
         return self.title
+    def get_dict(self):
+        return {
+            'id' : self.id,
+            'title' : self.title,
+            'XY' : {
+                'x' : self.x,
+                'y' : self.y,
+            },
+            'datetime' : self.datetime,
+        }
 
 class Post(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -15,6 +25,23 @@ class Post(models.Model):
     contents = models.TextField()
     x, y = models.FloatField(), models.FloatField()
     datetime = models.DateTimeField(default=timezone.now)
-    display = models.BooleanField(default=True)
     def __str__(self):
         return '{} :{}, ({}, {})'.format(self.user, self.contents, self.x, self.y)
+    def get_dict(self):
+        return {
+            'id': self.id,
+            'user' : {
+                'str' : str(self.user),
+                'id' : self.user.id,
+            },
+            'Theme_board' : {
+                'str' : str(self.Theme_board),
+                'id' : self.Theme_board.id,
+                },
+            'contents' : self.contents,
+            'XY' : {
+                'x' : self.x,
+                'y' : self.y,
+            },
+            'datetime' : self.datetime,
+        }

@@ -55,7 +55,7 @@ class Main {
 }
 
 class Application {
-  constructor(x, y) {
+  constructor(x = 0, y = 0) {
     this.space = document.getElementById("space");
 
     this.XY = {x:x, y:y};
@@ -74,8 +74,8 @@ class Application {
       history.replaceState('','','/space/@' + this.XY.x + "," + this.XY.y + '/');
     }.bind(this);
 
-    window.addEventListener("resize", this.getSpace.bind(this));
-    this.socket.socket.onopen = this.getSpace.bind(this);
+    window.addEventListener("resize", function(){ this.getSpace.bind(this); }.bind(this));
+    this.socket.socket.onopen = function(){ this.getSpace(); }.bind(this);
   }
   recv(data){
     console.log(data);
@@ -85,9 +85,9 @@ class Application {
       this.newPost(data.data);
     }
   }
-  getSpace(){
+  getSpace(datetime = new Date().toISOString()){
     this.socket.send({massage : 'set_range', data : this.getRange()});
-    this.socket.send({massage : 'get_sapce', data : {}});
+    this.socket.send({massage : 'get_sapce', data : {datetime : datetime}});
   }
   setSpace(data){
     var alredyhadID = this.data.getIds()
@@ -208,9 +208,9 @@ class CreatePost {
 
 class ObjectItem {
   constructor(data) {
-    this.id = data.id
-    this.XY = {x : data.x, y : data.y}
-    this.datetime = new Date(data.datetime)
+    this.id = data.id;
+    this.XY = data.XY;
+    this.datetime = new Date(data.datetime);
   }
   AddinnerHTML(text){
     document.getElementById("space").innerHTML += text;
@@ -236,9 +236,10 @@ class Theme_board extends ObjectItem {
 class Post extends ObjectItem {
   constructor(data) {
     super(data);
+    this.user = data.user;
     this.Theme_board = data.Theme_board;
     this.contents = data.contents;
-    this.AddinnerHTML(`<div id="Post_${this.id}" class="block Post">${this.contents}</div>\n`);
+    this.AddinnerHTML(`<div id="Post_${this.id}" class="block Post">${this.user.str}${this.contents}</div>\n`);
   }
 }
 
@@ -256,10 +257,10 @@ class MouseAction {
     this.onMouseUp = function(XYdiff){}.bind(this);
   }
   onMouseMove(event) {
-    this.XYdiff.x = this.XYtemp.x - event.pageX;
-    this.XYdiff.y = this.XYtemp.y - event.pageY;
-    this.XYtemp.x = event.pageX;
-    this.XYtemp.y = event.pageY;
+    var temp = {x:event.pageX, y:event.pageY};
+    this.XYdiff.x = this.XYtemp.x - temp.x;
+    this.XYdiff.y = this.XYtemp.y - temp.y;
+    this.XYtemp = temp;
   }
   onMouseDownAndMove() {
     this.MouseMove(this.XYdiff);
