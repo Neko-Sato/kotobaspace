@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from .models import Theme_board, Post
+from .models import Post
 
 class users:
     def __init__(self):
@@ -36,14 +36,8 @@ class user:
     def get_sapce(self, data):
         temp = datetime.fromisoformat(data['datetime'].replace('Z', '+00:00'))
         data = {
-            'Theme_board' : [],
             'Post' : [],
         }
-        data['Theme_board'].extend(\
-            [x.get_dict() for x in Theme_board.objects.filter(\
-                x__range=(self.range['TopLeft']['x'], self.range['BottomRight']['x']),\
-                y__range=(self.range['TopLeft']['y'], self.range['BottomRight']['y']),\
-            )])
         data['Post'].extend(\
             [x.get_dict() for x in Post.objects.filter(\
                 x__range=(self.range['TopLeft']['x'], self.range['BottomRight']['x']),\
@@ -56,17 +50,9 @@ class user:
     def create_post(self, data):
         temp_object = Post.objects.create(\
         user = self.socket.scope['user'],\
-        Theme_board = Theme_board.objects.get(pk=data['Theme_board']),\
         contents = data['contents'],\
         x = float(data['XY']['x']), y = float(data['XY']['y']))
         self.userslist.send('new_post', temp_object.get_dict(), lambda u: \
             (u.range['TopLeft']['x'] <= temp_object.x <= u.range['BottomRight']['x']) and \
             (u.range['TopLeft']['y'] <= temp_object.y <= u.range['BottomRight']['y'])\
         )
-
-class dict(dict):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.__dict__.update(self)
-def dict2new_dict():
-    pass

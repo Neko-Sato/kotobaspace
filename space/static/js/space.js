@@ -91,9 +91,7 @@ class Application {
   }
   setSpace(data){
     var alredyhadID = this.data.getIds()
-    data.Theme_board = data.Theme_board.filter(x => !(alredyhadID.Theme_board.includes(x.id)));
     data.Post = data.Post.filter(x => !alredyhadID.Post.includes(x.id));
-    data.Theme_board.forEach(x => this.data.Create(Theme_board, x), this);
     data.Post.forEach(x => this.data.Create(Post, x), this);
     this.moveObjectItem()
   }
@@ -125,12 +123,10 @@ class Application {
 class SpaceData {
   constructor() {
     this.data = {
-      Theme_board: [],
       Post: []
     }
   }
   Move(XY){
-    this.data.Theme_board.forEach(x => x.move(XY), this);
     this.data.Post.forEach(x => x.move(XY), this);
   }
   Create(type, data){
@@ -148,7 +144,6 @@ class SpaceData {
   }
   getIds(){
     return {
-      Theme_board: this.data.Theme_board.map(x => x.id),
       Post: this.data.Post.map(x => x.id)
     }
   }
@@ -159,7 +154,6 @@ class CreatePost {
     this.data = data;
     this.space = document.getElementById("space");
     this.selectXY = document.getElementById("selectXY");
-    this.select = document.getElementById("Theme_board_Select");
     this.contents = document.getElementById("contents");
     this.sendpost = document.getElementById("sendpost");
     this.XY = { x: 0, y: 0 };
@@ -177,17 +171,10 @@ class CreatePost {
       this.sendpost.style.display = "block";
       this.sendpost.style.left = event.clientX + "px";
       this.sendpost.style.top = event.clientY + "px";
-      this.data.data.Theme_board.forEach(function(item) {
-        var option = document.createElement("option");
-        option.text = item.title;
-        option.value = item.id;
-        this.select.appendChild(option);
-        }, this);
     }.bind(this);
   }
   getData() {
     var temp = {
-      Theme_board : this.select.value,
       contents : this.contents.value,
       XY : {
         x : this.XY.x,
@@ -198,7 +185,6 @@ class CreatePost {
     return temp;
   }
   reset(){
-    if (this.select.hasChildNodes()) this.select.childNodes.forEach(x =>this.select.removeChild(x), this);
     this.contents.value = "";
     this.XY = { x: 0, y: 0 };
     this.selectXY.style.display = "None";
@@ -222,14 +208,6 @@ class ObjectItem {
     var temp = this.getElement();
     temp.style.left = window.innerWidth/2 + this.XY.x - XY.x + "px";
     temp.style.top = window.innerHeight/2 + this.XY.y - XY.y + "px";
-  }
-}
-
-class Theme_board extends ObjectItem {
-  constructor(data) {
-    super(data);
-    this.title = data.title
-    this.AddinnerHTML(`<div id="Theme_board_${this.id}" class="block Theme_board">${this.title}</div>\n`);
   }
 }
 
