@@ -56,3 +56,7 @@ class user:
             (u.range['TopLeft']['x'] <= temp_object.x <= u.range['BottomRight']['x']) and \
             (u.range['TopLeft']['y'] <= temp_object.y <= u.range['BottomRight']['y'])\
         )
+
+class posts():
+    def get_post(id):
+        return Post.objects.get(id=int(id)).get_dict()

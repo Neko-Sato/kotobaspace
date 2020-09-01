@@ -4,8 +4,6 @@ from . import views
 app_name = 'space'
 urlpatterns = [
     path('', views.index),
-    path('space/', views.select),
-    path('space/@<str:x>,<str:y>/', views.space.as_view()),
-    #path('space/post/', views.post.as_view()),
-    #path('space/postget/', views.postget.as_view()),
+    path('space/', views.space.as_view()),
+    path('get_post/', views.get_post.as_view()),
 ]

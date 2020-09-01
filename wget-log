@@ -1,0 +1,28 @@
+--2020-09-01 16:41:48--  http://localhost:8000/get_post/84
+Resolving localhost (localhost)... 127.0.0.1
+Connecting to localhost (localhost)|127.0.0.1|:8000... connected.
+HTTP request sent, awaiting response... No data received.
+Retrying.
+
+--2020-09-01 16:42:58--  (try: 2)  http://localhost:8000/get_post/84
+Connecting to localhost (localhost)|127.0.0.1|:8000... connected.
+HTTP request sent, awaiting response... 301 Moved Permanently
+Location: /get_post/84/ [following]
+--2020-09-01 16:42:58--  http://localhost:8000/get_post/84/
+Reusing existing connection to localhost:8000.
+HTTP request sent, awaiting response... 302 Found
+Location: /accounts/login?next=/get_post/84/ [following]
+--2020-09-01 16:42:58--  http://localhost:8000/accounts/login?next=/get_post/84/
+Reusing existing connection to localhost:8000.
+HTTP request sent, awaiting response... 301 Moved Permanently
+Location: /accounts/login/?next=/get_post/84/ [following]
+--2020-09-01 16:42:58--  http://localhost:8000/accounts/login/?next=/get_post/84/
+Reusing existing connection to localhost:8000.
+HTTP request sent, awaiting response... 200 OK
+Length: 575 [text/html]
+Saving to: ‘84’
+
+     0K                                                       100% 4.29M=0s
+
+2020-09-01 16:42:59 (4.29 MB/s) - ‘84’ saved [575/575]
+

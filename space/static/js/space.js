@@ -39,6 +39,21 @@ class Socket {
   }
 }
 
+function GetQueryString() {
+    var result = {};
+    if( 1 < window.location.search.length ) {
+        var query = window.location.search.substring( 1 );
+        var parameters = query.split( '&' );
+        for( var i = 0; i < parameters.length; i++ ) {
+            var element = parameters[ i ].split( '=' );
+            var paramName = decodeURIComponent( element[ 0 ] );
+            var paramValue = decodeURIComponent( element[ 1 ] );
+            result[ paramName ] = paramValue;
+        }
+    }
+    return result;
+};
+
 //Main
 class Main {
   constructor() {
@@ -47,9 +62,8 @@ class Main {
 
     this.header = document.getElementById("header");
     this.hooder = document.getElementById("hooder");
-  }
-  Execution(x, y){
-    this.Application = new Application(x, y);
+    var temp = GetQueryString();
+    this.Application = new Application(temp.x, temp.y);
   }
 }
 
@@ -71,7 +85,7 @@ class Application {
     }.bind(this);
     this.MouseAction.onMouseUp = function(){
       this.getSpace();
-      history.replaceState('','','/space/@' + this.XY.x + "," + this.XY.y + '/');
+      history.replaceState('','','/space/?x=' + this.XY.x + "&y=" + this.XY.y );
     }.bind(this);
 
     window.addEventListener("resize", function(){ this.getSpace.bind(this); }.bind(this));
