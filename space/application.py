@@ -39,7 +39,7 @@ class user:
             'Post' : [],
         }
         data['Post'].extend(\
-            [x.get_dict() for x in Post.objects.filter(\
+            [x.id for x in Post.objects.filter(\
                 x__range=(self.range['TopLeft']['x'], self.range['BottomRight']['x']),\
                 y__range=(self.range['TopLeft']['y'], self.range['BottomRight']['y']),\
                 datetime__range=(temp-timedelta(seconds=30), temp),\

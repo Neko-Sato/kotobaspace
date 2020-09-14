@@ -63,7 +63,7 @@ class Main {
     this.header = document.getElementById("header");
     this.hooder = document.getElementById("hooder");
     var temp = GetQueryString();
-    this.Application = new Application(temp.x, temp.y);
+    this.Application = new Application(parseFloat(temp.x), parseFloat(temp.y));
   }
 }
 
