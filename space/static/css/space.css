@@ -67,7 +67,6 @@ body {
 }
 
 #sendpost {
-  display: none;
   z-index: 3;
   position: fixed;
 }
