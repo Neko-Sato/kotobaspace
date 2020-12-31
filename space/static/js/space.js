@@ -98,12 +98,13 @@ class Application {
     }.bind(this)
 
     this.MouseAction = new MouseAction(this.space);
-    this.MouseAction.MouseMove = function(XYdiff){
+    this.TouchAction = new TouchAction(this);
+    this.MouseAction.MouseMove = this.TouchAction.TouchMove = function(XYdiff){
       this.XY.x = this.XY.x + XYdiff.x;
       this.XY.y = this.XY.y + XYdiff.y;
       this.moveObjectItem()
     }.bind(this);
-    this.MouseAction.onMouseUp = function(){
+    this.MouseAction.onMouseUp = this.TouchAction.TouchEnd = function(){
       history.replaceState('','','/space/?x=' + this.XY.x + "&y=" + this.XY.y );
     }.bind(this);
 
@@ -190,8 +191,8 @@ class Data {
   Assassination(){
     var timetemp = this.mother.getTime()
     this.data.Post.forEach(function(temp){
-      if(!(temp.datetime.valueOf()-25000 <= timetemp.valueOf() &&
-      timetemp.valueOf() < temp.datetime.valueOf() + 25000)){
+      if(!(temp.datetime.valueOf()-30000 <= timetemp.valueOf() &&
+      timetemp.valueOf() < temp.datetime.valueOf() + 30000)){
         temp.Remove();
       }
     }, this);
@@ -311,18 +312,59 @@ class MouseAction {
     this.XYdiff.y = this.XYtemp.y - temp.y;
     this.XYtemp = temp;
   }
-  onMouseDownAndMove() {
+  onMouseDownAndMove(event) {
     this.MouseMove(this.XYdiff);
   }
-  onMouseDown_do() {
+  onMouseDown_do(event) {
     document.addEventListener("mousemove", this.onMouseDownAndMove);
     this.block.style.cursor = "move";
   }
-  onMouseUp_do() {
+  onMouseUp_do(event) {
     this.block.style.cursor = "auto";
     document.removeEventListener("mousemove", this.onMouseDownAndMove);
     this.onMouseUp();
   }
 }
+
+class TouchAction {
+  constructor(mother) {
+    this.mother = mother;
+    this.block = mother.space;
+
+    this.block.ontouchstart = this.onTouchStart_do.bind(this);
+
+    this.XYtemp = {x:0, y:0};
+    this.XYdiff = {x:0, y:0};
+
+    this.TouchMove = function(XYdiff){};
+    this.TouchEnd = function(XYdiff){};
+  }
+  onTouchStart_do(event){
+    if(event.changedTouches.length==1){
+      this.XYtemp = {x:event.changedTouches[0].pageX, y:event.changedTouches[0].pageY};
+      document.addEventListener("touchmove", this.onTouchMove_do.bind(this));
+    }else{
+      document.removeEventListener("touchmove", this.onTouchMove_do.bind(this));
+      this.onTouchEnd_do();
+    }
+  }
+  onTouchMove_do(event){
+    if(event.changedTouches.length==1){
+      document.addEventListener("touchend", this.onTouchEnd_do.bind(this));
+      var temp = {x:event.changedTouches[0].pageX, y:event.changedTouches[0].pageY};
+      this.XYdiff.x = parseInt(this.XYtemp.x - temp.x);
+      this.XYdiff.y = parseInt(this.XYtemp.y - temp.y);
+      this.XYtemp = temp;
+      this.TouchMove(this.XYdiff);
+    }else{
+      this.onTouchEnd_do();
+    }
+  }
+  onTouchEnd_do(){
+    document.removeEventListener("touchend", this.onTouchEnd_do.bind(this));
+    this.TouchEnd();
+  }
+}
+
 
 base = new Main();
