@@ -37,6 +37,14 @@ class Socket {
   }
 }
 
+(function() {
+  var noScroll = e => e.preventDefault();
+  document.addEventListener('touchmove', noScroll, { passive: false });
+  document.addEventListener('mousewheel', noScroll, { passive: false });
+  document.removeEventListener('touchmove', noScroll, { passive: false });
+  document.removeEventListener('mousewheel', noScroll, { passive: false });
+})();
+
 function GetQueryString() {
     var result = {};
     if( 1 < window.location.search.length ) {
@@ -61,6 +69,7 @@ class Main {
 
     this.header = document.getElementById("header");
     this.hooder = document.getElementById("hooder");
+    this.timedisplay = document.getElementById("time");
 
     this.Application = function(temp){
       return new Application(
@@ -69,7 +78,7 @@ class Main {
           x: parseFloat((typeof temp.x == "undefined") ? 0 : temp.x),
           y: parseFloat((typeof temp.y == "undefined") ? 0 : temp.y),
         },
-        (typeof temp.time == "undefined") ? 'now' : 'now',//temp.time,
+        (new Date(temp.time) == "Invalid Date") ? 'now' : new Date(temp.time),
       );
     }.bind(this)(GetQueryString())
   }
@@ -85,27 +94,33 @@ class Application {
     if(Time == 'now'){
       this.Timedlta = 0;
     }else {
-      this.Timedlta = new Date().valueOf() - new Date(Time).valueOf();
+      this.Timedlta = new Date().valueOf() - Time.valueOf();
     }
     this.getTime = function(string=false){
-      var temp;
-      if(this.Timedlta == 0 && string){
-        temp = "now";
-      } else {
-        temp = new Date(new Date().valueOf() - this.Timedlta);
+      var temp = new Date(new Date().valueOf() - this.Timedlta);
+      if(string){
+        if(this.Timedlta == 0){
+          temp = "now";
+        }else{
+          temp = temp.toISOString()
+        }
       }
       return temp
     }.bind(this)
 
+    setInterval(function(time){
+      this.mother.timedisplay.innerHTML = this.getTime();
+    }.bind(this),1000);
+
     this.MouseAction = new MouseAction(this.space);
-    this.TouchAction = new TouchAction(this);
-    this.MouseAction.MouseMove = this.TouchAction.TouchMove = function(XYdiff){
+    this.TouchAction = new TouchAction(this.space);
+    this.MouseAction.Move = this.TouchAction.Move = function(XYdiff){
       this.XY.x = this.XY.x + XYdiff.x;
       this.XY.y = this.XY.y + XYdiff.y;
       this.moveObjectItem()
     }.bind(this);
-    this.MouseAction.onMouseUp = this.TouchAction.TouchEnd = function(){
-      history.replaceState('','','/space/?x=' + this.XY.x + "&y=" + this.XY.y );
+    this.MouseAction.End = this.TouchAction.End = function(){
+      history.replaceState('','','/space/?x=' + this.XY.x + "&y=" + this.XY.y + "&time=" + this.getTime(true));
     }.bind(this);
 
     this.data = new Data(this)
@@ -122,8 +137,6 @@ class Application {
     }
 
     this.CreatePost = new CreatePost(this);
-
-    setInterval(this.data.Assassination.bind(this.data), 1000);
   }
   recv(response){
     this.RecvFunDict[response.massage].bind(this)(response.data);
@@ -166,6 +179,7 @@ class Data {
   constructor(mother) {
     this.mother = mother;
     this.data = { Post: [] };
+    setInterval(this.Assassination.bind(this), 1000);
   }
   getIds(){
     var temp = {}
@@ -293,78 +307,85 @@ class CreatePost {
   }
 }
 
-class MouseAction {
+class Action {
   constructor(block) {
     this.block = block;
-    document.addEventListener("mousemove", this.onMouseMove.bind(this));
-    this.block.onmousedown = this.onMouseDown_do.bind(this);
-    this.block.onmouseup = this.onMouseUp_do.bind(this);
-    this.onMouseDownAndMove = this.onMouseDownAndMove.bind(this);
+
+    //**************** = this.onStart_do.bind(this);
+    this.onEnd_do_bind = this.onEnd_do.bind(this);
+    //this.even_type_End = "";
+    this.onMove_do_bind = this.onMove_do.bind(this);
+    //this.even_type_Move = "";
 
     this.XYtemp = {x:0, y:0};
     this.XYdiff = {x:0, y:0};
-    this.MouseMove = function(XYdiff){};
-    this.onMouseUp = function(XYdiff){};
+
+    this.Move = function(XYdiff){};
+    this.End = function(){};
   }
-  onMouseMove(event) {
-    var temp = {x:event.pageX, y:event.pageY};
-    this.XYdiff.x = this.XYtemp.x - temp.x;
-    this.XYdiff.y = this.XYtemp.y - temp.y;
+  onStart_do(XY){
+    this.XYtemp = XY;
+    this.block.addEventListener(this.even_type_Move, this.onMove_do_bind);
+  }
+  onMove_do(XY){
+    this.block.addEventListener(this.even_type_End, this.onEnd_do_bind);
+    var temp = XY;
+    this.XYdiff.x = parseInt(this.XYtemp.x - temp.x);
+    this.XYdiff.y = parseInt(this.XYtemp.y - temp.y);
     this.XYtemp = temp;
+    this.Move(this.XYdiff);
   }
-  onMouseDownAndMove(event) {
-    this.MouseMove(this.XYdiff);
+  onEnd_do(){
+    this.block.removeEventListener(this.even_type_End, this.onEnd_do_bind);
+    this.block.removeEventListener(this.even_type_Move, this.onMove_do_bind);
+    this.End();
   }
-  onMouseDown_do(event) {
-    document.addEventListener("mousemove", this.onMouseDownAndMove);
+}
+class MouseAction extends Action {
+  constructor(block) {
+    super(block);
+    this.block.onmousedown = this.onStart_do.bind(this);
+    this.even_type_End = "mouseup";
+    this.even_type_Move = "mousemove";
+  }
+  onStart_do(event){
     this.block.style.cursor = "move";
+    super.onStart_do({x:event.pageX, y:event.pageY});
   }
-  onMouseUp_do(event) {
+  onMove_do(event){
+    super.onMove_do({x:event.pageX, y:event.pageY});
+  }
+  onEnd_do(){
     this.block.style.cursor = "auto";
-    document.removeEventListener("mousemove", this.onMouseDownAndMove);
-    this.onMouseUp();
+    super.onEnd_do();
   }
 }
 
-class TouchAction {
-  constructor(mother) {
-    this.mother = mother;
-    this.block = mother.space;
-
-    this.block.ontouchstart = this.onTouchStart_do.bind(this);
-
-    this.XYtemp = {x:0, y:0};
-    this.XYdiff = {x:0, y:0};
-
-    this.TouchMove = function(XYdiff){};
-    this.TouchEnd = function(XYdiff){};
+class TouchAction extends Action {
+  constructor(block) {
+    super(block);
+    this.block.ontouchstart = this.onStart_do.bind(this);
+    this.even_type_End = "touchend";
+    this.even_type_Move = "touchmove";
   }
-  onTouchStart_do(event){
+  onStart_do(event){
     if(event.changedTouches.length==1){
-      this.XYtemp = {x:event.changedTouches[0].pageX, y:event.changedTouches[0].pageY};
-      document.addEventListener("touchmove", this.onTouchMove_do.bind(this));
+      super.onStart_do({x:event.changedTouches[0].pageX, y:event.changedTouches[0].pageY});
     }else{
-      document.removeEventListener("touchmove", this.onTouchMove_do.bind(this));
-      this.onTouchEnd_do();
+      this.onEnd_do();
     }
   }
-  onTouchMove_do(event){
+  onMove_do(event){
     if(event.changedTouches.length==1){
-      document.addEventListener("touchend", this.onTouchEnd_do.bind(this));
-      var temp = {x:event.changedTouches[0].pageX, y:event.changedTouches[0].pageY};
-      this.XYdiff.x = parseInt(this.XYtemp.x - temp.x);
-      this.XYdiff.y = parseInt(this.XYtemp.y - temp.y);
-      this.XYtemp = temp;
-      this.TouchMove(this.XYdiff);
+      super.onMove_do({x:event.changedTouches[0].pageX, y:event.changedTouches[0].pageY});
     }else{
-      this.onTouchEnd_do();
+      this.onEnd_do();
     }
   }
-  onTouchEnd_do(){
-    document.removeEventListener("touchend", this.onTouchEnd_do.bind(this));
-    this.TouchEnd();
+  onEnd_do(){
+    this.block.style.cursor = "auto";
+    super.onEnd_do();
   }
 }
 
-
-base = new Main();
+var base = new Main();
