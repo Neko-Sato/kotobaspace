@@ -20,9 +20,12 @@ class test(WebsocketConsumer):
     def disconnect(self, close_code):
         self.com.remove()
     def send(self, msg='OK', data={}):
-        super().send(json.dumps({'massage': msg, 'data' : data}, default=json_serial))
+        data = {'massage': msg, 'data' : data}
+        super().send(json.dumps(data, default=json_serial))
+        #print("send: " , data)
     def receive(self, text_data):
         data = json.loads(text_data)
+        #print("receive: " , data)
         massage = data.get('massage')
         data = data.get('data')
         if massage == None or data == None:

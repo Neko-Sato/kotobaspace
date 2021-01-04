@@ -70,6 +70,7 @@ class Main {
     this.header = document.getElementById("header");
     this.hooder = document.getElementById("hooder");
     this.timedisplay = document.getElementById("time");
+    this.pointdisplay = document.getElementById("point");
 
     this.Application = function(temp){
       return new Application(
@@ -117,6 +118,7 @@ class Application {
     this.MouseAction.Move = this.TouchAction.Move = function(XYdiff){
       this.XY.x = this.XY.x + XYdiff.x;
       this.XY.y = this.XY.y + XYdiff.y;
+      this.mother.pointdisplay.innerHTML = "(x: " + this.XY.x + ", y:" + this.XY.y + ")";
       this.moveObjectItem()
     }.bind(this);
     this.MouseAction.End = this.TouchAction.End = function(){
@@ -206,7 +208,7 @@ class Data {
     var timetemp = this.mother.getTime()
     this.data.Post.forEach(function(temp){
       if(!(temp.datetime.valueOf()-30000 <= timetemp.valueOf() &&
-      timetemp.valueOf() < temp.datetime.valueOf() + 30000)){
+      timetemp.valueOf() < temp.datetime.valueOf() + 10000)){
         temp.Remove();
       }
     }, this);
