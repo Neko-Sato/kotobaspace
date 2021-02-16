@@ -24,10 +24,13 @@ class test(WebsocketConsumer):
         super().send(json.dumps(data, default=json_serial))
         #print("send: " , data)
     def receive(self, text_data):
-        data = json.loads(text_data)
-        #print("receive: " , data)
-        massage = data.get('massage')
-        data = data.get('data')
+        try:
+            data = json.loads(text_data)
+            #print("receive: " , data)
+            massage = data.get('massage')
+            data = data.get('data')
+        except json.decoder.JSONDecodeError:
+            massage = data = None
         if massage == None or data == None:
             self.send('error: Missing format')
             return

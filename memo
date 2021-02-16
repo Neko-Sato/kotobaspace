@@ -1,0 +1,25 @@
+ramdom = function(a){
+  return  Math.floor( Math.random() * a*2 ) - a;
+}
+ramdomstrings = function(n){
+  var l = n;
+  var c = "abcdefghijklmnopqrstuvwxyz0123456789";
+  var cl = c.length;
+  var r = "";
+  for(var i=0; i<l; i++){
+    r += c[Math.floor(Math.random()*cl)];
+  }
+  return r;
+}
+
+setInterval(function(){
+  var temp = {
+    contents : ramdomstrings(8),
+    XY : {
+      x : ramdom(2000),
+      y : ramdom(2000)
+    }
+  }
+  base.Application.CreatePostSend(temp)
+  console.log(temp)
+}.bind(this), 1000);

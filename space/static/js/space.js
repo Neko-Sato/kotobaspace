@@ -123,6 +123,8 @@ class Application {
     }.bind(this);
     this.MouseAction.End = this.TouchAction.End = function(){
       history.replaceState('','','/space/?x=' + this.XY.x + "&y=" + this.XY.y + "&time=" + this.getTime(true));
+      this.setRange();
+      this.RequestPost();
     }.bind(this);
 
     this.data = new Data(this)
@@ -139,6 +141,11 @@ class Application {
     }
 
     this.CreatePost = new CreatePost(this);
+
+    window.onresize = function(){
+      this.setRange();
+      this.RequestPost();
+    }.bind(this);
   }
   recv(response){
     this.RecvFunDict[response.massage].bind(this)(response.data);
@@ -207,8 +214,8 @@ class Data {
   Assassination(){
     var timetemp = this.mother.getTime()
     this.data.Post.forEach(function(temp){
-      if(!(temp.datetime.valueOf()-30000 <= timetemp.valueOf() &&
-      timetemp.valueOf() < temp.datetime.valueOf() + 10000)){
+      if(!(temp.datetime.valueOf()-300000 <= timetemp.valueOf() &&
+      timetemp.valueOf() < temp.datetime.valueOf() + 30000)){
         temp.Remove();
       }
     }, this);
